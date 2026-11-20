@@ -345,36 +345,6 @@ require("lazy").setup({
     end,
   },
 
-  -- Tabs (buffers abiertos arriba, como las pestañas del IDE)
-  {
-    "akinsho/bufferline.nvim",
-    version = "*",
-    lazy = false,
-    opts = {
-      options = {
-        mode = "buffers",
-        diagnostics = "nvim_lsp",
-        diagnostics_indicator = function(count, level)
-          return (level:match("error") and " ✖" or " ▲") .. count
-        end,
-        show_buffer_icons = vim.g.have_nerd_font,
-        show_buffer_close_icons = true,
-        show_close_icon = false,
-        buffer_close_icon = "×",
-        modified_icon = "●",
-        close_icon = "×",
-        left_trunc_marker = "◂",
-        right_trunc_marker = "▸",
-        separator_style = "thin",
-        always_show_bufferline = true,
-        offsets = {
-          { filetype = "NvimTree", text = "Archivos", text_align = "center", separator = true },
-        },
-        close_command = function(n) require("bufferline").unpin_and_close(n) end,
-      },
-    },
-  },
-
   -- Cobertura de tests (Coverage Gutters)
   {
     "andythigpen/nvim-coverage",
@@ -520,38 +490,19 @@ end
 map("i", "jk", "<Esc>", "Salir de insert")
 map("i", "kj", "<Esc>", "Salir de insert")
 
--- Tabs (Tab / ` = siguiente / anterior, en el orden de la barra)
-map("n", "<Tab>", "<cmd>BufferLineCycleNext<cr>", "Tab siguiente")
-map("n", "`", "<cmd>BufferLineCyclePrev<cr>", "Tab anterior")
-map("n", "<leader><", "<cmd>BufferLineMovePrev<cr>", "Mover tab a la izquierda")
-map("n", "<leader>>", "<cmd>BufferLineMoveNext<cr>", "Mover tab a la derecha")
-map("n", "<leader>bo", "<cmd>BufferLineCloseOthers<cr>", "Cerrar las demás tabs")
-map("n", "<leader>bp", "<cmd>BufferLinePick<cr>", "Elegir tab por letra")
+-- Tabs por panel (lua/wintabs.lua): cada panel tiene su fila de tabs, como VS Code
+local wintabs = require("wintabs")
+wintabs.setup()
+map("n", "<Tab>", function() wintabs.cycle(1) end, "Tab siguiente (del panel)")
+map("n", "`", function() wintabs.cycle(-1) end, "Tab anterior (del panel)")
+map("n", "<leader><", function() wintabs.move(-1) end, "Mover tab a la izquierda")
+map("n", "<leader>>", function() wintabs.move(1) end, "Mover tab a la derecha")
+map("n", "<leader>bo", wintabs.close_others, "Cerrar las demás tabs del panel")
+map("n", "<leader>bp", "<cmd>Telescope buffers<cr>", "Elegir entre archivos abiertos")
 for _, i in ipairs({ 1, 2, 3, 4, 5, 7, 8, 9 }) do -- <leader>6 = seleccionar bloque
-  map("n", "<leader>" .. i, "<cmd>BufferLineGoToBuffer " .. i .. "<cr>", "Ir a tab " .. i)
+  map("n", "<leader>" .. i, function() wintabs.go(i) end, "Ir a tab " .. i .. " del panel")
 end
-
--- Cerrar la tab sin romper el layout (el árbol no ocupa la ventana del editor)
-local function close_buffer()
-  local buf = vim.api.nvim_get_current_buf()
-  if vim.bo[buf].modified then
-    return vim.notify("Hay cambios sin guardar (<leader>w)", vim.log.levels.WARN)
-  end
-  -- Si hay un split (p. ej. definición abierta a la derecha), cerrar ese panel
-  -- y quitar su tab si el archivo ya no se ve en ningún otro panel
-  local editor_wins = vim.tbl_filter(function(w)
-    return vim.api.nvim_win_get_config(w).relative == ""
-      and vim.bo[vim.api.nvim_win_get_buf(w)].filetype ~= "NvimTree"
-  end, vim.api.nvim_tabpage_list_wins(0))
-  if #editor_wins > 1 then
-    vim.api.nvim_win_close(0, false)
-    if #vim.fn.win_findbuf(buf) == 0 then pcall(vim.api.nvim_buf_delete, buf, {}) end
-    return
-  end
-  local listed = vim.tbl_filter(function(b) return vim.bo[b].buflisted end, vim.api.nvim_list_bufs())
-  if #listed > 1 then vim.cmd("BufferLineCyclePrev") else vim.cmd("enew") end
-  pcall(vim.api.nvim_buf_delete, buf, {})
-end
+local close_buffer = wintabs.close -- q: cierra la tab; si era la última del panel, cierra el panel
 
 -- Guardar / cerrar (movidos a <leader> para no pisar w y q de Vim)
 map("n", "<leader>w", "<cmd>w<cr>", "Guardar")
@@ -913,6 +864,14 @@ do
       end
       local empty = vim.api.nvim_get_current_buf()
       vim.cmd.edit(vim.fn.fnameescape(current.path))
+      do -- tabs del panel en el orden guardado
+        local bufs = {}
+        for _, f in ipairs(data.files) do
+          local b = vim.fn.bufnr(f.path)
+          if b > 0 then table.insert(bufs, b) end
+        end
+        require("wintabs").set(vim.api.nvim_get_current_win(), bufs)
+      end
       -- quitar el buffer vacío / de carpeta inicial para que no salga una tab extra
       local ename = vim.api.nvim_buf_get_name(empty)
       if empty ~= vim.api.nvim_get_current_buf() and not vim.bo[empty].modified
