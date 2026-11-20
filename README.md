@@ -8,32 +8,45 @@ Mi configuración de terminal para desarrollar en Flutter: Neovim, Ranger y Warp
 | `ranger/` | `~/.config/ranger` | enlace simbólico |
 | `warp/` | `~/.warp` | copia (Warp reescribe `settings.toml`) |
 
-## Instalación
+## Instalación en una Mac nueva
 
-```sh
-git clone https://github.com/Stratovarius93/dotfiles ~/Developer/dotfiles
-brew install neovim ranger chafa ripgrep
-~/Developer/dotfiles/install.sh
-nvim   # lazy.nvim instala los plugins al abrir
-```
+1. **(Opcional) Instala Cartograph CF** en `~/Library/Fonts` si la tienes (ver [Fuentes](#fuentes)).
+2. Ejecuta:
 
-Si ya tienes una config de nvim o ranger, `install.sh` la guarda como `*.backup-<fecha>` antes de enlazar.
+   ```sh
+   git clone https://github.com/Stratovarius93/dotfiles ~/Developer/dotfiles
+   ~/Developer/dotfiles/install.sh
+   ```
 
-## Fuente con iconos
+3. Abre Warp (o reinícialo con Cmd+Q) y escribe `nvim`.
 
-Warp no busca en otra fuente los iconos que faltan en la principal, así que la fuente tiene que traerlos dentro. Uso Cartograph CF con los iconos de Nerd Fonts añadidos. Cartograph es de pago y **no está en este repo**: cada uno tiene que crear su propia copia.
+`install.sh` hace todo lo demás:
 
-```sh
-brew install fontforge
-curl -sSLO https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FontPatcher.zip
-unzip FontPatcher.zip -d FontPatcher && cd FontPatcher
-for f in Regular RegularItalic Bold BoldItalic; do
-  fontforge -script font-patcher --complete --careful -out out ~/Library/Fonts/CartographCF-$f.otf
-done
-cp out/*.otf ~/Library/Fonts/
-```
+- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, fontforge y JetBrainsMono Nerd Font.
+- Instala Warp si no está.
+- Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, y copia la config y el tema de Warp. Si ya había una config, la guarda como `*.backup-<fecha>`.
+- Elige la fuente:
+  - **CartographCF Nerd Font**, si ya tienes Cartograph con iconos.
+  - Si tienes Cartograph sin iconos, se los añade automáticamente y usa esa.
+  - **JetBrainsMono Nerd Font** en cualquier otro caso.
+- Instala los plugins de nvim con las versiones exactas de `lazy-lock.json` y los parsers de Treesitter.
 
-Esto crea la familia **CartographCF Nerd Font**, que es la que usa `warp/settings.toml`. Sin Cartograph sirve cualquier Nerd Font (por ejemplo, JetBrainsMono Nerd Font): cambia `font_name` en `warp/settings.toml`. Si no quieres iconos, pon `vim.g.have_nerd_font = false` al principio de `nvim/init.lua`.
+Se puede volver a ejecutar sin problema: lo que ya está hecho se salta. Si instalas Cartograph después, vuelve a ejecutarlo para usarla.
+
+Flutter no se instala solo, porque cada proyecto puede usar una versión distinta: `fvm install stable && fvm global stable`. Para `<leader>c` hace falta [Claude Code](https://claude.com/claude-code).
+
+## Fuentes
+
+La fuente **tiene que traer los iconos dentro (Nerd Font)**. Warp no busca en otra fuente los iconos que le faltan a la principal: sin una Nerd Font, el árbol, las tabs y Telescope salen con huecos en blanco.
+
+| Fuente | Precio | Instalación |
+|---|---|---|
+| **Cartograph CF** (la que uso) | De pago | Cópiala a `~/Library/Fonts` antes de `install.sh` y le añade los iconos sola. Nunca se sube a este repo. |
+| **JetBrainsMono Nerd Font** (por defecto) | Gratis | La instala `install.sh` |
+| **Maple Mono NF** (cursivas a mano, parecida a Cartograph) | Gratis | `brew install --cask font-maple-mono-nf` |
+| **CaskaydiaCove Nerd Font** (Cascadia Code) | Gratis | `brew install --cask font-caskaydia-cove-nerd-font` |
+
+Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.warp/settings.toml` (o en Warp: Settings → Appearance) y reinicia Warp. Si no quieres iconos, pon `vim.g.have_nerd_font = false` al principio de `nvim/init.lua`.
 
 ## Neovim
 
