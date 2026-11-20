@@ -269,6 +269,23 @@ require("lazy").setup({
     end,
   },
 
+  -- Colores visibles detrás de #RRGGBB, rgb(), hsl() (como en CSS).
+  -- En Dart, Colors.x y Color(0xFF...) ya los pinta el LSP (nvim 0.12).
+  {
+    "brenoprata10/nvim-highlight-colors",
+    event = { "BufReadPost", "BufNewFile" },
+    opts = {
+      render = "background",
+      enable_hex = true,
+      enable_short_hex = true,
+      enable_rgb = true,
+      enable_hsl = true,
+      enable_var_usage = true,
+      enable_named_colors = false, -- no pintar palabras como "red"
+      enable_tailwind = false,
+    },
+  },
+
   -- Barra de estado (modo, rama, errores/warnings, tipo de archivo)
   {
     "nvim-lualine/lualine.nvim",
@@ -410,6 +427,40 @@ require("lazy").setup({
 }, { install = { colorscheme = { "gruvbox-flutter" } } })
 
 -- ── Diagnósticos inline (Error Lens) ─────────────────────
+-- Colores Flutter 0xAARRGGBB sueltos (ej. const kGrey = 0xffa2a2a2), que el LSP no pinta.
+-- Solo se procesan las líneas visibles en pantalla.
+do
+  local ns = vim.api.nvim_create_namespace("flutter_hex_colors")
+  local created = {}
+  local function group_for(rgb)
+    local name = "FlutterHex_" .. rgb
+    if not created[name] then
+      local n = tonumber(rgb, 16)
+      local r, g, b = math.floor(n / 65536), math.floor(n / 256) % 256, n % 256
+      local light = (0.299 * r + 0.587 * g + 0.114 * b) > 150
+      vim.api.nvim_set_hl(0, name, { bg = "#" .. rgb, fg = light and "#1d2021" or "#f2e7ca" })
+      created[name] = true
+    end
+    return name
+  end
+  vim.api.nvim_create_autocmd("ColorScheme", { callback = function() created = {} end })
+  vim.api.nvim_set_decoration_provider(ns, {
+    on_win = function(_, _, buf) return vim.bo[buf].filetype == "dart" end,
+    on_line = function(_, _, buf, row)
+      local line = vim.api.nvim_buf_get_lines(buf, row, row + 1, false)[1] or ""
+      local init = 1
+      while true do
+        local s, e, rgb = line:find("0[xX]%x%x(%x%x%x%x%x%x)%f[^%w_]", init)
+        if not s then break end
+        vim.api.nvim_buf_set_extmark(buf, ns, row, s - 1, {
+          end_col = e, hl_group = group_for(rgb:lower()), ephemeral = true, priority = 200,
+        })
+        init = e + 1
+      end
+    end,
+  })
+end
+
 -- Estilo Error Lens: fondo de color en la línea con error/warning + mensaje al final
 local function errorlens_highlights()
   local bg = vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg or 0x282828
