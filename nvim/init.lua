@@ -1,5 +1,6 @@
 -- Neovim config: Gruvbox Flutter + Flutter/Dart (portado de Antigravity)
 vim.g.mapleader = " "
+vim.g.start_argv = vim.fn.argv() -- antes de que nvim-tree reemplace `nvim .` (ver "Recordar archivos")
 vim.g.maplocalleader = " "
 -- Iconos de archivo (Symbols Nerd Font). Ponlo en false si se ven cuadros o "?"
 vim.g.have_nerd_font = true
@@ -257,7 +258,8 @@ require("lazy").setup({
           local wins = vim.tbl_filter(function(w)
             return vim.api.nvim_win_get_config(w).relative == ""
           end, vim.api.nvim_list_wins())
-          if #wins == 2 then
+          -- solo al salir desde el archivo; si el foco está en el árbol, cerrarlo aborta :qa
+          if #wins == 2 and vim.bo.filetype ~= "NvimTree" then
             for _, w in ipairs(wins) do
               if vim.bo[vim.api.nvim_win_get_buf(w)].filetype == "NvimTree" then
                 api.tree.close()
@@ -763,3 +765,106 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
 
 -- Claude Code en un split de terminal (<leader>c)
 map("n", "<leader>c", "<cmd>vsplit | terminal claude<cr>", "Claude Code")
+
+-- Recordar archivos abiertos por carpeta: al abrir `nvim` sin argumentos se reabren
+-- los archivos de la última vez (con la posición del cursor). Si sales 3 veces
+-- seguidas con los mismos archivos, la siguiente vez arranca limpio.
+do
+  local dir = vim.fn.stdpath("state") .. "/last-files"
+  local function state_file()
+    return dir .. "/" .. vim.fn.getcwd():gsub("[/\\:]", "%%") .. ".json"
+  end
+  local function read_state()
+    local ok, data = pcall(function() return vim.json.decode(table.concat(vim.fn.readfile(state_file()), "\n")) end)
+    return ok and type(data) == "table" and data or nil
+  end
+  local function same_files(a, b)
+    if #a ~= #b then return false end
+    local set = {}
+    for _, f in ipairs(a) do set[f.path] = true end
+    for _, f in ipairs(b) do if not set[f.path] then return false end end
+    return true
+  end
+
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    callback = function()
+      local files, cur = {}, vim.api.nvim_get_current_buf()
+      for _, b in ipairs(vim.api.nvim_list_bufs()) do
+        local name = vim.api.nvim_buf_get_name(b)
+        local st = name ~= "" and vim.uv.fs_stat(name)
+        if vim.bo[b].buflisted and vim.bo[b].buftype == "" and st and st.type == "file" then
+          local pos = b == cur and vim.api.nvim_win_get_cursor(0) or vim.api.nvim_buf_get_mark(b, '"')
+          table.insert(files, { path = name, line = pos[1], col = pos[2], current = b == cur })
+        end
+      end
+      if #files == 0 then return end -- sin archivos: no tocar lo guardado
+      local prev = read_state()
+      local count = (prev and same_files(prev.files or {}, files)) and (prev.count or 1) + 1 or 1
+      if count >= 3 then
+        os.remove(state_file()) -- 3 salidas seguidas iguales → próxima vez limpio
+        return
+      end
+      vim.fn.mkdir(dir, "p")
+      vim.fn.writefile({ vim.json.encode({ files = files, count = count }) }, state_file())
+    end,
+  })
+
+  vim.api.nvim_create_autocmd("VimEnter", {
+    nested = true, -- dispara filetype, LSP, treesitter al abrir los archivos
+    callback = function()
+      if vim.g.started_with_stdin then return end
+      local argv = vim.g.start_argv or {}
+      if #argv == 1 and vim.fn.isdirectory(argv[1]) == 1 then
+        vim.fn.chdir(argv[1]) -- `nvim <carpeta>`: restaurar los archivos de esa carpeta
+      elseif #argv > 0 then
+        return -- se pidieron archivos concretos
+      end
+      local data = read_state()
+      if not data or not data.files then return end
+      local current, n = nil, 0
+      for _, f in ipairs(data.files) do
+        if vim.uv.fs_stat(f.path) then
+          vim.cmd.badd(vim.fn.fnameescape(f.path))
+          if f.current or not current then current = f end
+          n = n + 1
+        end
+      end
+      if not current then return end
+      -- si nvim-tree ocupó la ventana (por `nvim .`), lo cerramos y lo reabrimos al lado
+      local tree_open = false
+      local ok_tree, tree = pcall(require, "nvim-tree.api")
+      if ok_tree and vim.bo.filetype == "NvimTree" then
+        tree.tree.close()
+        tree_open = true
+      end
+      local empty = vim.api.nvim_get_current_buf()
+      vim.cmd.edit(vim.fn.fnameescape(current.path))
+      -- quitar el buffer vacío / de carpeta inicial para que no salga una tab extra
+      local ename = vim.api.nvim_buf_get_name(empty)
+      if empty ~= vim.api.nvim_get_current_buf() and not vim.bo[empty].modified
+        and (ename == "" or vim.fn.isdirectory(ename) == 1) then
+        pcall(vim.api.nvim_buf_delete, empty, { force = true })
+      end
+      pcall(vim.api.nvim_win_set_cursor, 0, { current.line, current.col })
+      -- cursor en los demás archivos al entrar a ellos
+      for _, f in ipairs(data.files) do
+        local b = vim.fn.bufnr(f.path)
+        if b > 0 and not f.current then
+          vim.api.nvim_create_autocmd("BufWinEnter", {
+            buffer = b, once = true,
+            callback = function() pcall(vim.api.nvim_win_set_cursor, 0, { f.line, f.col }) end,
+          })
+        end
+      end
+      if tree_open then
+        local file_win = vim.api.nvim_get_current_win()
+        tree.tree.open({ focus = false })
+        vim.schedule(function()
+          if vim.api.nvim_win_is_valid(file_win) then vim.api.nvim_set_current_win(file_win) end
+        end)
+      end
+      vim.notify(("Reabiertos %d archivo(s) · salida %d/3 sin cambios"):format(n, data.count or 1))
+    end,
+  })
+  vim.api.nvim_create_autocmd("StdinReadPre", { callback = function() vim.g.started_with_stdin = true end })
+end
