@@ -127,10 +127,14 @@ require("lazy").setup({
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = {
       defaults = {
-        mappings = { i = {
-          ["<C-j>"] = "move_selection_next",
-          ["<C-k>"] = "move_selection_previous",
-        } },
+        mappings = {
+          i = {
+            ["<C-j>"] = "move_selection_next",
+            ["<C-k>"] = "move_selection_previous",
+            ["<C-CR>"] = "select_vertical", -- abrir en panel a la derecha
+          },
+          n = { ["<C-CR>"] = "select_vertical" },
+        },
         -- Imágenes en la vista previa con chafa (caracteres de color; Warp no muestra imágenes reales en nvim)
         preview = {
           mime_hook = function(filepath, bufnr, opts)
