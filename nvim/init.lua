@@ -686,7 +686,26 @@ map("n", "<F5>", function() require("flutter_menu").open() end, "Menú Flutter (
 map("n", "<F6>", "<cmd>FlutterReload<cr>", "Hot reload")
 map("n", "<F7>", "<cmd>FlutterRestart<cr>", "Hot restart")
 map("n", "<F8>", "<cmd>FlutterQuit<cr>", "Detener app")
-map("n", "<F2>", "<cmd>FlutterLogToggle<cr>", "Logs Flutter")
+-- F2 = Salida (como Output de Antigravity): historial de mensajes, avisos y errores de nvim
+local function toggle_output()
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.b[vim.api.nvim_win_get_buf(w)].is_output_panel then return vim.api.nvim_win_close(w, true) end
+  end
+  local lines = vim.split(vim.trim(vim.fn.execute("messages")), "\n")
+  if #lines == 1 and lines[1] == "" then lines = { "(sin mensajes)" } end
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].filetype = "log"
+  vim.b[buf].is_output_panel = true
+  vim.cmd("botright 12split")
+  vim.api.nvim_win_set_buf(0, buf)
+  vim.wo.winbar = "%#WinTabSel# Salida (mensajes de nvim) %*"
+  vim.api.nvim_win_set_cursor(0, { #lines, 0 })
+end
+map("n", "<F2>", toggle_output, "Salida (mensajes de nvim)")
+map("n", "<F3>", "<cmd>FlutterLogToggle<cr>", "Debug Console (logs de la app Flutter)")
 
 -- Cobertura: correr tests con cobertura y pintar el gutter
 local function project_root()

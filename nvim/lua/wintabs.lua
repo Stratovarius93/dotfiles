@@ -144,6 +144,13 @@ end
 -- Cierra la tab actual del panel. Si era la última y hay otros paneles, cierra el panel.
 function M.close()
   local win, buf = api.nvim_get_current_win(), api.nvim_get_current_buf()
+  -- paneles especiales (logs de Flutter, outline, ayuda…): cerrar el panel sin borrar su buffer
+  if vim.bo[buf].buftype ~= "" then
+    if #vim.tbl_filter(is_editor_win, api.nvim_tabpage_list_wins(0)) > 1 then
+      return api.nvim_win_close(win, false)
+    end
+    return vim.cmd.enew()
+  end
   if vim.bo[buf].modified then
     return vim.notify("Hay cambios sin guardar (<leader>w)", vim.log.levels.WARN)
   end
