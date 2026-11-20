@@ -678,29 +678,74 @@ map("n", "<leader>ts", "<cmd>CoverageSummary<cr>", "Resumen de cobertura")
 -- Vista previa de imágenes (Gutter Preview) con Quick Look de macOS
 local image_ext = { png = 1, jpg = 1, jpeg = 1, gif = 1, webp = 1, bmp = 1, svg = 1, ico = 1 }
 
-local function preview_image_under_cursor()
+-- Devuelve la ruta absoluta de la imagen bajo el cursor (o nil + mensaje)
+local function image_under_cursor()
   local line, col = vim.api.nvim_get_current_line(), vim.fn.col(".")
   local path
-  -- busca la ruta entre comillas que contiene el cursor
   for s, p, e in line:gmatch("()['\"]([^'\"]+)['\"]()") do
     if col >= s and col < e then path = p break end
   end
   path = path or vim.fn.expand("<cfile>")
   local ext = (path:match("%.(%w+)$") or ""):lower()
-  if not image_ext[ext] then
-    return vim.notify("No hay ruta de imagen bajo el cursor", vim.log.levels.INFO)
-  end
-  local candidates = { path, project_root() .. "/" .. path, vim.fn.expand("%:p:h") .. "/" .. path }
-  for _, f in ipairs(candidates) do
-    if vim.uv.fs_stat(f) then
-      vim.system({ "qlmanage", "-p", vim.fn.fnamemodify(f, ":p") }, { stdout = false, stderr = false })
-      return
+  if not image_ext[ext] then return nil, "No hay ruta de imagen bajo el cursor" end
+  local dir, name = path:match("^(.-)/?([^/]+)$")
+  local bases = { "", project_root() .. "/", vim.fn.expand("%:p:h") .. "/" }
+  for _, base in ipairs(bases) do
+    -- también busca variantes Flutter 2.0x / 3.0x
+    for _, f in ipairs({ path, dir .. "/3.0x/" .. name, dir .. "/2.0x/" .. name }) do
+      if vim.uv.fs_stat(base .. f) then return vim.fn.fnamemodify(base .. f, ":p") end
     end
   end
-  vim.notify("No se encontró: " .. path, vim.log.levels.WARN)
+  return nil, "No se encontró: " .. path
 end
 
-map("n", "<leader>p", preview_image_under_cursor, "Previsualizar imagen")
+-- Vista previa flotante junto al cursor (chafa en caracteres de color). q / Esc / mover cursor la cierra.
+local function float_image_preview()
+  local file = image_under_cursor()
+  if not file then return end -- sin imagen bajo el cursor: no hace nada
+  if vim.fn.executable("chafa") == 0 then return vim.notify("Falta chafa (brew install chafa)", vim.log.levels.WARN) end
+  local w, h = 50, 22
+  local buf = vim.api.nvim_create_buf(false, true)
+  local win = vim.api.nvim_open_win(buf, false, {
+    relative = "cursor", row = 1, col = 0, width = w, height = h + 1,
+    style = "minimal", border = "rounded",
+    title = " " .. vim.fn.fnamemodify(file, ":t") .. " ", title_pos = "center",
+  })
+  local chan = vim.api.nvim_open_term(buf, {})
+  vim.system({ "chafa", "--format=symbols", "--animate=off", "--size=" .. w .. "x" .. h, file }, {}, function(r)
+    vim.schedule(function()
+      if vim.api.nvim_buf_is_valid(buf) then vim.api.nvim_chan_send(chan, ((r.stdout or ""):gsub("\n", "\r\n"))) end
+    end)
+  end)
+  local src = vim.api.nvim_get_current_buf()
+  local function close()
+    if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
+    for _, k in ipairs({ "q", "<Esc>" }) do pcall(vim.keymap.del, "n", k, { buffer = src }) end
+  end
+  local pos = vim.api.nvim_win_get_cursor(0)
+  vim.api.nvim_create_autocmd({ "CursorMoved", "BufLeave", "InsertEnter" }, {
+    buffer = src,
+    callback = function(ev)
+      if ev.event == "CursorMoved" and vim.deep_equal(vim.api.nvim_win_get_cursor(0), pos) then return end
+      close()
+      return true -- elimina el autocmd
+    end,
+  })
+  for _, k in ipairs({ "q", "<Esc>" }) do
+    vim.keymap.set("n", k, close, { buffer = src, nowait = true })
+  end
+end
+
+local function preview_image_under_cursor()
+  local file, err = image_under_cursor()
+  if not file then return vim.notify(err, vim.log.levels.INFO) end
+  vim.system({ "qlmanage", "-p", file }, { stdout = false, stderr = false })
+end
+
+-- Solo Espacio (sin otra tecla, tras timeoutlen) sobre una ruta de imagen → vista flotante.
+-- Espacio + otra tecla sigue funcionando como <leader>.
+map("n", "<leader>", float_image_preview, "Previsualizar imagen (flotante)")
+map("n", "<leader>P", preview_image_under_cursor, "Previsualizar imagen (Quick Look)")
 
 -- Abrir un archivo de imagen directamente → Quick Look en vez de binario
 vim.api.nvim_create_autocmd("BufReadCmd", {
