@@ -3,6 +3,7 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 -- Iconos de archivo (Symbols Nerd Font). Ponlo en false si se ven cuadros o "?"
 vim.g.have_nerd_font = true
+vim.o.showmode = false -- el modo ya se ve en lualine
 vim.g.loaded_netrw = 1      -- nvim-tree reemplaza al explorador netrw
 vim.g.loaded_netrwPlugin = 1
 
@@ -165,6 +166,17 @@ require("lazy").setup({
   -- EasyMotion
   { "folke/flash.nvim", event = "VeryLazy", opts = {} },
 
+  -- Panel de problemas (como Problems de VS Code): F4
+  {
+    "folke/trouble.nvim",
+    cmd = "Trouble",
+    opts = { focus = true },
+    keys = {
+      { "<F4>", "<cmd>Trouble diagnostics toggle<cr>", desc = "Problemas del proyecto" },
+      { "<S-F4>", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Problemas del archivo" },
+    },
+  },
+
   -- Barra lateral de archivos estilo NERDTree (a la derecha, sin Nerd Font)
   {
     "nvim-tree/nvim-tree.lua",
@@ -257,6 +269,59 @@ require("lazy").setup({
     end,
   },
 
+  -- Barra de estado (modo, rama, errores/warnings, tipo de archivo)
+  {
+    "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
+    dependencies = { { "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font } },
+    opts = function()
+      local p = require("gruvbox-flutter").palette
+      local function mode(color)
+        return {
+          a = { fg = p.bg0, bg = color, gui = "bold" },
+          b = { fg = p.fg, bg = p.bg4 },
+          c = { fg = p.fg_soft, bg = p.bg1 },
+        }
+      end
+      local nf = vim.g.have_nerd_font
+      return {
+        options = {
+          theme = {
+            normal = mode(p.blue),
+            insert = mode(p.green),
+            visual = mode(p.purple),
+            replace = mode(p.red),
+            command = mode(p.yellow),
+            terminal = mode(p.aqua),
+            inactive = {
+              a = { fg = p.grey1, bg = p.bg1 },
+              b = { fg = p.grey1, bg = p.bg1 },
+              c = { fg = p.grey1, bg = p.bg1 },
+            },
+          },
+          globalstatus = true,
+          icons_enabled = nf,
+          component_separators = nf and { left = "", right = "" } or { left = "|", right = "|" },
+          section_separators = nf and { left = "", right = "" } or { left = "", right = "" },
+          disabled_filetypes = { statusline = { "NvimTree" } },
+        },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "branch", "diff" },
+          lualine_c = {
+            { "diagnostics", symbols = nf and { error = " ", warn = " ", info = " ", hint = "󰌵 " }
+              or { error = "E", warn = "W", info = "I", hint = "H" } },
+            { "filename", path = 1 },
+          },
+          lualine_x = { "filetype" },
+          lualine_y = { "progress" },
+          lualine_z = { "location" },
+        },
+        extensions = { "nvim-tree", "toggleterm", "lazy", "trouble" },
+      }
+    end,
+  },
+
   -- Tabs (buffers abiertos arriba, como las pestañas del IDE)
   {
     "akinsho/bufferline.nvim",
@@ -345,8 +410,40 @@ require("lazy").setup({
 }, { install = { colorscheme = { "gruvbox-flutter" } } })
 
 -- ── Diagnósticos inline (Error Lens) ─────────────────────
+-- Estilo Error Lens: fondo de color en la línea con error/warning + mensaje al final
+local function errorlens_highlights()
+  local bg = vim.api.nvim_get_hl(0, { name = "Normal", link = false }).bg or 0x282828
+  local function blend(fg, alpha)
+    local out = 0
+    for shift = 16, 0, -8 do
+      local a, b = bit.band(bit.rshift(fg, shift), 0xff), bit.band(bit.rshift(bg, shift), 0xff)
+      out = out + bit.lshift(math.floor(a * alpha + b * (1 - alpha) + 0.5), shift)
+    end
+    return out
+  end
+  for _, sev in ipairs({ "Error", "Warn", "Info", "Hint" }) do
+    local fg = vim.api.nvim_get_hl(0, { name = "DiagnosticVirtualText" .. sev, link = false }).fg
+      or vim.api.nvim_get_hl(0, { name = "Diagnostic" .. sev, link = false }).fg
+    if fg then
+      vim.api.nvim_set_hl(0, "ErrorLensLine" .. sev, { bg = blend(fg, 0.18) })
+      vim.api.nvim_set_hl(0, "DiagnosticVirtualText" .. sev, { fg = fg, bg = blend(fg, 0.18), italic = true })
+    end
+  end
+end
+errorlens_highlights()
+vim.api.nvim_create_autocmd("ColorScheme", { callback = errorlens_highlights })
+
+local S = vim.diagnostic.severity
 vim.diagnostic.config({
-  virtual_text = { prefix = "●", spacing = 2 },
+  virtual_text = { prefix = "●", spacing = 4 },
+  signs = {
+    linehl = {
+      [S.ERROR] = "ErrorLensLineError",
+      [S.WARN] = "ErrorLensLineWarn",
+      [S.INFO] = "ErrorLensLineInfo",
+      [S.HINT] = "ErrorLensLineHint",
+    },
+  },
   severity_sort = true,
   float = { border = "rounded" },
 })
