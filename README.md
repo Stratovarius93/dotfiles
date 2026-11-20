@@ -1,12 +1,13 @@
 # dotfiles
 
-Mi configuración de terminal para desarrollar en Flutter: Neovim, Ranger y Warp, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
+Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
 
 | Carpeta | Destino | Cómo se instala |
 |---|---|---|
 | `nvim/` | `~/.config/nvim` | enlace simbólico |
 | `ranger/` | `~/.config/ranger` | enlace simbólico |
 | `warp/` | `~/.warp` | copia (Warp reescribe `settings.toml`) |
+| `antigravity/` | `~/Library/Application Support/Antigravity IDE/User` | copia de `settings.json` y `keybindings.json`, y extensiones de `extensions.txt` |
 
 ## Instalación en una Mac nueva
 
@@ -22,7 +23,7 @@ Mi configuración de terminal para desarrollar en Flutter: Neovim, Ranger y Warp
 
 `install.sh` hace todo lo demás:
 
-- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, fontforge y JetBrainsMono Nerd Font.
+- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, node, fontforge y JetBrainsMono Nerd Font.
 - Instala Warp si no está.
 - Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, y copia la config y el tema de Warp. Si ya había una config, la guarda como `*.backup-<fecha>`.
 - Elige la fuente:
@@ -30,8 +31,11 @@ Mi configuración de terminal para desarrollar en Flutter: Neovim, Ranger y Warp
   - Si tienes Cartograph sin iconos, se los añade automáticamente y usa esa.
   - **JetBrainsMono Nerd Font** en cualquier otro caso.
 - Instala los plugins de nvim con las versiones exactas de `lazy-lock.json` y los parsers de Treesitter.
+- Si Antigravity IDE está instalado, copia su `settings.json` y `keybindings.json` (guardando un `*.backup-<fecha>` si eran distintos), instala las extensiones de [`antigravity/extensions.txt`](antigravity/extensions.txt) y empaqueta e instala el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme) desde su repo, porque no está en el marketplace. Si Antigravity no está instalado, se salta este paso: instálalo y vuelve a ejecutar `install.sh`.
 
 Se puede volver a ejecutar sin problema: lo que ya está hecho se salta. Si instalas Cartograph después, vuelve a ejecutarlo para usarla.
+
+Lo que **no** se guarda en este repo: Flutter, Xcode, Android Studio, Cartograph CF y Claude Code (se instalan aparte), y los datos que nvim genera con el uso (archivos recientes, caché de dispositivos), que se vuelven a crear solos.
 
 Flutter no se instala solo, porque cada proyecto puede usar una versión distinta: `fvm install stable && fvm global stable`. Para `<leader>c` hace falta [Claude Code](https://claude.com/claude-code).
 
@@ -58,8 +62,16 @@ Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.war
 - **Flutter y Dart:** flutter-tools (con fvm), LSP de Dart, nvim-treesitter
 - **Autocompletado:** nvim-cmp, LuaSnip, friendly-snippets
 - **Archivos:** nvim-tree (árbol lateral), mini.files (columnas), Ranger (ventana flotante), Telescope (búsqueda)
-- **Interfaz:** tabs por panel (`lua/wintabs.lua`), lualine, trouble, gitsigns, neoscroll (scroll suave), flash, toggleterm
+- **Interfaz:** tabs por panel ([`lua/wintabs.lua`](nvim/lua/wintabs.lua)), lualine (barra de estado), trouble (panel de problemas), gitsigns, neoscroll (scroll suave), flash, toggleterm
+- **Colores:** nvim-highlight-colors (`#RRGGBB`, `rgb()`, `hsl()`) y resaltador propio para `0xAARRGGBB` de Flutter
 - **Tests:** nvim-coverage
+
+### Funciones automáticas
+
+- **Reabrir archivos:** `nvim` o `nvim .` vuelve a abrir los archivos de la última vez en esa carpeta, con la posición del cursor. Si sales 3 veces seguidas con los mismos archivos, la siguiente vez arranca limpio. `nvim archivo.dart` abre solo ese archivo.
+- **Estilo Error Lens:** las líneas con errores o warnings se pintan de rojo o amarillo, con el mensaje al final.
+- **Colores visibles:** los códigos de color (`#ea6962`, `rgb(…)`, `0xffa2a2a2`) se muestran con su color de fondo. En Dart, `Colors.x` y `Color(0x…)` los pinta el LSP.
+- **Tabs por panel:** cada panel tiene su propia fila de tabs, como los grupos de editor de VS Code. Se puede hacer clic en una tab, y clic con la rueda la cierra.
 
 ### Atajos
 
@@ -70,22 +82,37 @@ Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.war
 | `<leader>n` / `<leader>e` | Mostrar u ocultar el árbol / ir al árbol |
 | `-` | mini.files (columnas tipo Ranger, editables) |
 | `<leader>o` | Ranger flotante |
-| `<leader>f` / `<leader>F` | Buscar archivo / buscar texto |
+| `<leader>f` | Buscar archivo; los recientes del proyecto salen primero, marcados con 󰋚 |
+| `<leader>F` | Buscar texto en todo el proyecto |
 | `<leader>/` | Paleta de comandos |
-| `<leader>S` | Buscar y reemplazar |
-| `<leader>p` | Ver la imagen con Vista Rápida de macOS |
+| `<leader>S` | Buscar y reemplazar **en el archivo actual** |
+| `/` y luego `n` / `N` | Buscar en el archivo actual / siguiente / anterior |
+| `Ctrl+n` | Quitar el resaltado de la búsqueda |
+
+En Telescope: `Ctrl+j` / `Ctrl+k` mueven, `Enter` abre, `Ctrl+Enter` (o `Ctrl+v`) abre en un panel a la derecha y `Ctrl+q` manda los resultados a la lista quickfix.
 
 En el árbol: `Enter` u `o` abre, `s` o `Shift+Enter` abre a la derecha, `i` abre debajo, `u` sube un nivel, `I` muestra los ocultos y `?` muestra la ayuda.
+
+**Imágenes**
+
+| Atajo | Acción |
+|---|---|
+| `Espacio` (sola, sobre una ruta como `'assets/img/x.png'`) | Vista previa flotante junto al cursor; `Espacio` otra vez, `q`, `Esc` o mover el cursor la cierra |
+| `<leader>P` | Abrir la imagen en Vista Rápida de macOS (tamaño real) |
+
+Busca también las variantes `2.0x/` y `3.0x/` de Flutter. La vista flotante usa chafa (caracteres de color), porque Warp no muestra imágenes reales dentro de nvim.
 
 **Tabs y paneles**
 
 | Atajo | Acción |
 |---|---|
 | `Tab` / `` ` `` | Tab siguiente / anterior del panel |
-| `q` | Cerrar la tab, o el panel si la pantalla está dividida |
+| `<leader>1`…`9` | Ir a la tab N del panel (menos `6`) |
+| `<leader><` / `<leader>>` | Mover la tab a la izquierda / derecha |
+| `<leader>bo` | Cerrar las demás tabs del panel |
+| `<leader>bp` | Elegir entre todos los archivos abiertos |
+| `q` (o `<leader>q`) | Cerrar la tab; si era la última del panel, se cierra el panel. En logs, outline o ayuda, cierra el panel |
 | `Q` | Cerrar todo y salir (pregunta si hay cambios sin guardar) |
-| `<leader>bo` / `<leader>bp` | Cerrar las demás tabs / elegir tab por letra |
-| `<leader><` / `<leader>>` | Mover la tab |
 | `Ctrl+h/j/k/l` | Ir al panel de la izquierda / abajo / arriba / derecha |
 | `<leader>w` / `<leader>W` | Guardar / guardar todo |
 | `<leader>m` | Grabar macro (sustituye a `q`) |
@@ -100,18 +127,54 @@ En el árbol: `Enter` u `o` abre, `s` o `Shift+Enter` abre a la derecha, `i` abr
 | `<leader>a` | Arreglo rápido (quick fix) |
 | `<leader>rn` | Renombrar |
 | `Alt+j` / `Alt+k` | Error siguiente / anterior |
+| `F4` / `Shift+F4` | Problemas de todo el proyecto / del archivo (trouble) |
+
+**Edición**
+
+| Atajo | Acción |
+|---|---|
+| `jk` o `kj` | Salir de INSERT |
+| `<leader>,` / `<leader>;` | Poner `,` / `;` al final de la línea |
+| `<leader>6` / `<leader>^` | Seleccionar el bloque desde el inicio de la línea / desde la palabra |
+| `<leader>s` | Saltar a cualquier parte de la pantalla (flash) |
 
 **Flutter**
 
 | Atajo | Acción |
 |---|---|
-| `<leader>d` | `flutter run` |
-| `<leader>r` o `F6` / `<leader>R` o `F7` | Hot reload / hot restart |
-| `F8` / `F2` | Detener la app / ver los logs |
+| `F5` | Menú de Flutter (ver abajo) |
+| `<leader>d` | `flutter run` directo |
+| `F6` o `<leader>r` / `F7` o `<leader>R` | Hot reload / hot restart |
+| `F8` | Detener la app |
+| `F3` | Logs de la app (como la Debug Console) |
+| `F2` | Salida: historial de mensajes de nvim (como Output) |
+| `<leader>N` | Flutter Outline: árbol de widgets del archivo, a la derecha |
 | `<leader>tc` | Tests con cobertura |
 | `<leader>tl` / `<leader>tt` / `<leader>ts` | Cargar / mostrar u ocultar / resumen de la cobertura |
 
-**Otros:** `jk` o `kj` salen de INSERT, `F1` abre la terminal y `<leader>c` abre Claude Code.
+**Menú `F5`** ([`lua/flutter_menu.lua`](nvim/lua/flutter_menu.lua)):
+
+- **Con la app detenida** muestra los dispositivos (físicos, simuladores, escritorio, Chrome) y los emuladores apagados para iniciarlos. Abre al instante con los de la última búsqueda y se actualiza solo cuando termina `flutter devices`.
+- Al elegir un dispositivo pide el **entorno**:
+  - Si el proyecto tiene `.vscode/launch.json`, usa sus configuraciones (`--flavor`, `program` como `--target`, `flutterMode`, `args` y `toolArgs`).
+  - Si no, detecta los flavors de `android/app/build.gradle(.kts)` y de los esquemas de Xcode, solo los de la plataforma del dispositivo, y usa `lib/**/main_<flavor>.dart` como target si existe.
+  - El último entorno usado sale primero. Si hay uno solo, no pregunta.
+- **Con la app corriendo** muestra Hot Reload, Hot Restart, Stop, DevTools en el navegador, Copiar URL del profiler, Logs, Inspeccionar widget, Debug paint, Performance overlay, Repaint rainbow, Animaciones lentas, Brillo y Desconectar.
+
+**Otros:** `F1` abre la terminal y `<leader>c` abre Claude Code.
+
+## Antigravity IDE
+
+[`antigravity/`](antigravity/) guarda `settings.json` (VSCodeVim con los mismos atajos que nvim, tema e iconos Gruvbox Flutter, fuente Cartograph CF), `keybindings.json` y la lista de extensiones. `install.sh` los copia e instala.
+
+Si cambias la config en Antigravity, actualiza el repo con:
+
+```sh
+U="$HOME/Library/Application Support/Antigravity IDE/User"
+cp "$U/settings.json" "$U/keybindings.json" ~/Developer/dotfiles/antigravity/
+"/Applications/Antigravity IDE.app/Contents/Resources/app/bin/antigravity-ide" --list-extensions \
+  | grep -v '^stratovarius93.gruvbox-flutter-theme$' > ~/Developer/dotfiles/antigravity/extensions.txt
+```
 
 ## Ranger
 

@@ -1,0 +1,11 @@
+anthropic.claude-code
+dart-code.dart-code
+dart-code.flutter
+eamodio.gitlens
+esentis.flutter-find-unused-assets-and-dart-files
+felixangelov.bloc
+kisstkondoros.vscode-gutter-preview
+ryanluker.vscode-coverage-gutters
+usernamehw.errorlens
+vscodevim.vim
+waderyan.gitblame

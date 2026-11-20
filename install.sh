@@ -5,6 +5,7 @@
 #   3. Enlaces de nvim y ranger a este repo, y copia de la config de Warp
 #   4. Fuente: Cartograph CF con iconos si tienes Cartograph; si no, JetBrainsMono Nerd Font
 #   5. Plugins de nvim (versiones de lazy-lock.json) y parsers de Treesitter
+#   6. Antigravity IDE (si está instalado): settings, atajos, extensiones y tema Gruvbox Flutter
 # Se puede ejecutar varias veces: lo que ya está hecho se salta.
 set -e
 DOTFILES="${0:A:h}"
@@ -83,6 +84,45 @@ step "Plugins de nvim (puede tardar un par de minutos)"
 nvim --headless "+Lazy! restore" +qa
 nvim --headless "+TSUpdateSync" +qa
 echo "Listo"
+
+# ── 6. Antigravity IDE ────────────────────────────────────
+step "Antigravity IDE"
+AG_APP="/Applications/Antigravity IDE.app"
+AG_CLI="$AG_APP/Contents/Resources/app/bin/antigravity-ide"
+AG_USER="$HOME/Library/Application Support/Antigravity IDE/User"
+if [[ -x "$AG_CLI" ]]; then
+  mkdir -p "$AG_USER"
+  for f in settings.json keybindings.json; do
+    if [[ -f "$AG_USER/$f" ]] && ! cmp -s "$DOTFILES/antigravity/$f" "$AG_USER/$f"; then
+      cp "$AG_USER/$f" "$AG_USER/$f.backup-$STAMP"
+      echo "Respaldo: $AG_USER/$f.backup-$STAMP"
+    fi
+    cp "$DOTFILES/antigravity/$f" "$AG_USER/$f"
+  done
+  echo "Copiado: settings.json y keybindings.json"
+  installed=$("$AG_CLI" --list-extensions 2>/dev/null)
+  while read -r ext; do
+    [[ -z "$ext" ]] && continue
+    if print -r -- "$installed" | grep -qix "$ext"; then
+      echo "Extensión ya instalada: $ext"
+    else
+      "$AG_CLI" --install-extension "$ext" >/dev/null 2>&1 && echo "Instalada: $ext" || echo "No se pudo instalar: $ext"
+    fi
+  done < "$DOTFILES/antigravity/extensions.txt"
+  # El tema Gruvbox Flutter no está en el marketplace: se empaqueta desde su repo
+  if print -r -- "$installed" | grep -qix "stratovarius93.gruvbox-flutter-theme"; then
+    echo "Extensión ya instalada: stratovarius93.gruvbox-flutter-theme"
+  else
+    tmp=$(mktemp -d)
+    git clone -q --depth 1 https://github.com/Stratovarius93/gruvbox-flutter-theme "$tmp/theme"
+    (cd "$tmp/theme" && npx --yes @vscode/vsce package -o "$tmp/theme.vsix" >/dev/null 2>&1) \
+      && "$AG_CLI" --install-extension "$tmp/theme.vsix" >/dev/null 2>&1 && echo "Instalada: Gruvbox Flutter Theme" \
+      || echo "No se pudo instalar el tema Gruvbox Flutter (ver README)"
+    rm -rf "$tmp"
+  fi
+else
+  echo "Antigravity IDE no está instalado: instálalo y vuelve a ejecutar install.sh para copiar su config"
+fi
 
 print -P "\n%F{green}Todo listo.%f Abre Warp (o reinícialo con Cmd+Q) y ejecuta: nvim"
 [[ "$FONT" == "JetBrainsMono Nerd Font" ]] && echo "¿Tienes Cartograph CF? Instálala en ~/Library/Fonts y vuelve a ejecutar install.sh para usarla con iconos."

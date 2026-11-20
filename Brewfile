@@ -15,6 +15,9 @@ brew "chafa"
 # Flutter por proyecto (flutter-tools usa .fvm si existe)
 brew "fvm"
 
+# Para empaquetar el tema Gruvbox Flutter de Antigravity (npx @vscode/vsce)
+brew "node"
+
 # Para añadir iconos a una fuente propia (Cartograph)
 brew "fontforge"
 
