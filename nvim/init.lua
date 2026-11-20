@@ -736,7 +736,11 @@ local function image_under_cursor()
 end
 
 -- Vista previa flotante junto al cursor (chafa en caracteres de color). q / Esc / mover cursor la cierra.
+local close_image_preview -- función para cerrar la vista abierta (nil si no hay)
+
 local function float_image_preview()
+  -- Espacio otra vez con la vista abierta → solo cerrarla
+  if close_image_preview then return close_image_preview() end
   local file = image_under_cursor()
   if not file then return end -- sin imagen bajo el cursor: no hace nada
   if vim.fn.executable("chafa") == 0 then return vim.notify("Falta chafa (brew install chafa)", vim.log.levels.WARN) end
@@ -754,17 +758,21 @@ local function float_image_preview()
     end)
   end)
   local src = vim.api.nvim_get_current_buf()
+  local au
   local function close()
+    close_image_preview = nil
     if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
+    if vim.api.nvim_buf_is_valid(buf) then pcall(vim.api.nvim_buf_delete, buf, { force = true }) end
+    if au then pcall(vim.api.nvim_del_autocmd, au) end
     for _, k in ipairs({ "q", "<Esc>" }) do pcall(vim.keymap.del, "n", k, { buffer = src }) end
   end
+  close_image_preview = close
   local pos = vim.api.nvim_win_get_cursor(0)
-  vim.api.nvim_create_autocmd({ "CursorMoved", "BufLeave", "InsertEnter" }, {
+  au = vim.api.nvim_create_autocmd({ "CursorMoved", "BufLeave", "InsertEnter" }, {
     buffer = src,
     callback = function(ev)
       if ev.event == "CursorMoved" and vim.deep_equal(vim.api.nvim_win_get_cursor(0), pos) then return end
       close()
-      return true -- elimina el autocmd
     end,
   })
   for _, k in ipairs({ "q", "<Esc>" }) do
