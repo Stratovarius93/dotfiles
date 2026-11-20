@@ -161,7 +161,16 @@ Busca también las variantes `2.0x/` y `3.0x/` de Flutter. La vista flotante usa
   - El último entorno usado sale primero. Si hay uno solo, no pregunta.
 - **Con la app corriendo** muestra Hot Reload, Hot Restart, Stop, DevTools en el navegador, Copiar URL del profiler, Logs, Inspeccionar widget, Debug paint, Performance overlay, Repaint rainbow, Animaciones lentas, Brillo y Desconectar.
 
-**Otros:** `F1` abre la terminal y `<leader>c` abre Claude Code.
+**Otros**
+
+| Atajo | Acción |
+|---|---|
+| `F1` | Terminal |
+| `<leader>c` | Mostrar / ocultar Claude Code a la derecha. Al ocultarlo sigue corriendo y vuelve la misma sesión |
+| `Ctrl+q` (dentro de Claude) | Ocultar Claude Code |
+| `Ctrl+\` `Ctrl+n` (dentro de una terminal) | Pasar a modo normal, por ejemplo para copiar texto |
+
+Al salir de Claude (`/exit`) su panel se cierra solo.
 
 ## Antigravity IDE
 

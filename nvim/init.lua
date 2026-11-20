@@ -826,7 +826,47 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
 })
 
 -- Claude Code en un split de terminal (<leader>c)
-map("n", "<leader>c", "<cmd>vsplit | terminal claude<cr>", "Claude Code")
+-- <leader>c: mostrar / ocultar Claude Code a la derecha, conservando la misma sesión.
+-- Dentro del panel, Ctrl+q lo oculta (Espacio ahí se escribe en Claude).
+local claude_buf
+local function toggle_claude()
+  if claude_buf and vim.api.nvim_buf_is_valid(claude_buf) then
+    local wins = vim.fn.win_findbuf(claude_buf)
+    if #wins > 0 then -- visible → ocultar (la sesión sigue viva)
+      for _, w in ipairs(wins) do
+        if not pcall(vim.api.nvim_win_close, w, false) then
+          vim.api.nvim_win_call(w, function() vim.cmd("enew") end) -- era el único panel
+        end
+      end
+      vim.cmd("stopinsert")
+      return
+    end
+    vim.cmd("vsplit") -- oculto → volver a mostrar la misma sesión
+    vim.api.nvim_win_set_buf(0, claude_buf)
+  else
+    vim.cmd("vsplit | terminal claude")
+    claude_buf = vim.api.nvim_get_current_buf()
+    vim.bo[claude_buf].buflisted = false -- no aparece en recientes ni en <leader>bp
+    vim.keymap.set("t", "<C-q>", toggle_claude, { buffer = claude_buf, desc = "Ocultar Claude Code" })
+    vim.api.nvim_create_autocmd("TermClose", { -- al salir de Claude (/exit) se cierra su panel
+      buffer = claude_buf,
+      once = true,
+      callback = function(ev)
+        claude_buf = nil
+        vim.schedule(function()
+          for _, w in ipairs(vim.fn.win_findbuf(ev.buf)) do
+            if not pcall(vim.api.nvim_win_close, w, true) then
+              vim.api.nvim_win_call(w, function() vim.cmd("enew") end)
+            end
+          end
+          pcall(vim.api.nvim_buf_delete, ev.buf, { force = true })
+        end)
+      end,
+    })
+  end
+  vim.cmd("startinsert")
+end
+map("n", "<leader>c", toggle_claude, "Claude Code (mostrar / ocultar)")
 
 -- Recordar archivos abiertos por carpeta: al abrir `nvim` sin argumentos se reabren
 -- los archivos de la última vez (con la posición del cursor). Si sales 3 veces
