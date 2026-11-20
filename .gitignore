@@ -1,0 +1,7 @@
+*.bak
+*.bak-*
+*.backup-*
+.DS_Store
+# Fuentes comerciales (Cartograph): nunca subirlas
+*.otf
+*.ttf
