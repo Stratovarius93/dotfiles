@@ -682,6 +682,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 map("n", "<leader>d", "<cmd>FlutterRun<cr>", "Flutter run")
 map("n", "<leader>r", "<cmd>FlutterReload<cr>", "Hot reload")
 map("n", "<leader>R", "<cmd>FlutterRestart<cr>", "Hot restart")
+map("n", "<F5>", function() require("flutter_menu").open() end, "Menú Flutter (dispositivos / acciones)")
 map("n", "<F6>", "<cmd>FlutterReload<cr>", "Hot reload")
 map("n", "<F7>", "<cmd>FlutterRestart<cr>", "Hot restart")
 map("n", "<F8>", "<cmd>FlutterQuit<cr>", "Detener app")
