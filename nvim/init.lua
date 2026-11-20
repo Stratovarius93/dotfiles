@@ -583,7 +583,77 @@ map("n", "<C-k>", "<C-w>k", "Split arriba")
 map("n", "<C-l>", "<C-w>l", "Split derecho")
 
 -- Buscador
-map("n", "<leader>f", "<cmd>Telescope find_files<cr>", "Buscar archivo")
+-- Buscar archivo con los recientes primero (como Cmd+P de VS Code): con el buscador
+-- vacío aparecen junto al prompt, marcados con un reloj; al escribir siguen ganando.
+local function find_files_with_recent()
+  local pickers, finders = require("telescope.pickers"), require("telescope.finders")
+  local conf, make_entry = require("telescope.config").values, require("telescope.make_entry")
+  local cwd = vim.fn.getcwd()
+  local current = vim.api.nvim_buf_get_name(0)
+  local recent, seen = {}, { [current] = true }
+  local function add(path)
+    if #recent >= 15 or path == "" or seen[path] or path:sub(1, #cwd + 1) ~= cwd .. "/" then return end
+    local st = vim.uv.fs_stat(path)
+    if not st or st.type ~= "file" then return end
+    seen[path] = true
+    table.insert(recent, path)
+  end
+  -- 1) archivos de esta sesión (incluye los ya cerrados), del más reciente al más antiguo
+  local bufs = vim.tbl_filter(function(b) return b.name ~= "" and vim.bo[b.bufnr].buftype == "" end, vim.fn.getbufinfo())
+  table.sort(bufs, function(a, b) return a.lastused > b.lastused end)
+  for _, b in ipairs(bufs) do add(b.name) end
+  -- 2) historial de sesiones anteriores
+  for _, f in ipairs(vim.v.oldfiles) do add(vim.fn.fnamemodify(f, ":p")) end
+
+  local results = {}
+  for i, p in ipairs(recent) do table.insert(results, { path = p, rank = i }) end
+  for _, rel in ipairs(vim.fn.systemlist({ "rg", "--files", "--color", "never" })) do
+    local p = cwd .. "/" .. rel
+    if not seen[p] then table.insert(results, { path = p }) end
+  end
+
+  local base = make_entry.gen_from_file({ cwd = cwd })
+  local icon = vim.g.have_nerd_font and "󰋚 " or "* "
+  local entry_maker = function(item)
+    local e = base(item.path)
+    if not e then return end
+    e.rank = item.rank
+    local display = e.display
+    e.display = function(ent)
+      local text, hl = display(ent)
+      local prefix = ent.rank and icon or "  "
+      local shifted = {}
+      for _, h in ipairs(hl or {}) do
+        table.insert(shifted, { { h[1][1] + #prefix, h[1][2] + #prefix }, h[2] })
+      end
+      if ent.rank then
+        table.insert(shifted, { { 0, #prefix }, "TelescopeResultsSpecialComment" })
+        table.insert(shifted, { { #prefix, #prefix + #text }, "TelescopeResultsIdentifier" })
+      end
+      return prefix .. text, shifted
+    end
+    return e
+  end
+
+  local sorter = conf.file_sorter({})
+  local score = sorter.scoring_function
+  sorter.scoring_function = function(self, prompt, line, entry, ...)
+    local s = score(self, prompt, line, entry, ...)
+    if entry.rank and s >= 0 then
+      return s * 0.5 - (100 - entry.rank) * 1e-4 -- menor = mejor; respeta el orden de recientes
+    end
+    return s
+  end
+
+  pickers.new({}, {
+    prompt_title = "Buscar archivo  (" .. icon .. "= reciente)",
+    finder = finders.new_table({ results = results, entry_maker = entry_maker }),
+    sorter = sorter,
+    previewer = conf.file_previewer({}),
+  }):find()
+end
+
+map("n", "<leader>f", find_files_with_recent, "Buscar archivo (recientes primero)")
 map("n", "<leader>F", "<cmd>Telescope live_grep<cr>", "Buscar texto")
 map("n", "<leader>/", "<cmd>Telescope commands<cr>", "Paleta de comandos")
 map("n", "<leader>S", ":%s//g<Left><Left>", "Buscar y reemplazar")
