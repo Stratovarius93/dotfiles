@@ -70,6 +70,8 @@ require("lazy").setup({
         fvm = true,                                   -- dart.flutterSdkPath = .fvm
         widget_guides = { enabled = true },           -- previewFlutterUiGuides
         closing_tags = { enabled = true },
+        -- Flutter Outline (árbol de widgets) a la derecha del código; solo con <leader>N
+        outline = { open_cmd = "rightbelow 40vnew", auto_open = false, icons = vim.g.have_nerd_font },
         dev_log = { enabled = true, open_cmd = "botright 15split" },
         lsp = {
           capabilities = require("cmp_nvim_lsp").default_capabilities(),
@@ -608,6 +610,13 @@ local function find_files_with_recent()
   }):find()
 end
 
+map("n", "<leader>N", function()
+  if vim.fn.exists(":FlutterOutlineToggle") == 2 then
+    vim.cmd("FlutterOutlineToggle")
+  else
+    vim.notify("Flutter Outline: abre primero un archivo .dart", vim.log.levels.INFO)
+  end
+end, "Flutter Outline (árbol de widgets)")
 map("n", "<leader>f", find_files_with_recent, "Buscar archivo (recientes primero)")
 map("n", "<leader>F", "<cmd>Telescope live_grep<cr>", "Buscar texto")
 map("n", "<leader>/", "<cmd>Telescope commands<cr>", "Paleta de comandos")
