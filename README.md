@@ -58,7 +58,7 @@ Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.war
 - **Flutter y Dart:** flutter-tools (con fvm), LSP de Dart, nvim-treesitter
 - **Autocompletado:** nvim-cmp, LuaSnip, friendly-snippets
 - **Archivos:** nvim-tree (árbol lateral), mini.files (columnas), Ranger (ventana flotante), Telescope (búsqueda)
-- **Interfaz:** bufferline (tabs), gitsigns, neoscroll (scroll suave), flash, toggleterm
+- **Interfaz:** tabs por panel (`lua/wintabs.lua`), lualine, trouble, gitsigns, neoscroll (scroll suave), flash, toggleterm
 - **Tests:** nvim-coverage
 
 ### Atajos
@@ -81,7 +81,7 @@ En el árbol: `Enter` u `o` abre, `s` o `Shift+Enter` abre a la derecha, `i` abr
 
 | Atajo | Acción |
 |---|---|
-| `Tab` / `` ` `` | Tab siguiente / anterior |
+| `Tab` / `` ` `` | Tab siguiente / anterior del panel |
 | `q` | Cerrar la tab, o el panel si la pantalla está dividida |
 | `Q` | Cerrar todo y salir (pregunta si hay cambios sin guardar) |
 | `<leader>bo` / `<leader>bp` | Cerrar las demás tabs / elegir tab por letra |
