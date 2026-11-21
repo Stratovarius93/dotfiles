@@ -3,7 +3,9 @@
   "workbench.sideBar.location": "right",
   // FLUTTER DART
   "dart.lineLength": 80,
-  "dart.flutterSdkPath": ".fvm/versions/stable",
+  "dart.flutterSdkPath": ".fvm/flutter_sdk",
+  // No analizar carpetas sin código Dart propio (build/ puede pesar GB y retrasa el coloreado semántico)
+  "dart.analysisExcludedFolders": ["build", "ios", "android", "macos", "linux", "windows", "web"],
   "dart.previewFlutterUiGuides": true,
   "dart.previewFlutterUiGuidesCustomTracking": true,
   "[dart]": {

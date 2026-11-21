@@ -75,7 +75,13 @@ require("lazy").setup({
         dev_log = { enabled = true, open_cmd = "botright 15split" },
         lsp = {
           capabilities = require("cmp_nvim_lsp").default_capabilities(),
-          settings = { lineLength = 80, enableSnippets = true },
+          settings = {
+            lineLength = 80,
+            enableSnippets = true,
+            -- No analizar carpetas sin código Dart propio (build/ puede pesar GB y retrasa el outline ~8 s)
+            analysisExcludedFolders = vim.tbl_map(function(d) return vim.fn.getcwd() .. "/" .. d end,
+              { "build", "ios", "android", "macos", "linux", "windows", "web" }),
+          },
         },
       })
     end,
