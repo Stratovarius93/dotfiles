@@ -23,13 +23,14 @@ blue = "#7daea3"
 purple = "#d3869b"
 
 [fill]
-symbol = " "
+symbol = "─"
+style = "grey"
 
 [time]
 disabled = false
 time_format = "%H:%M"
 style = "fg_soft"
-format = "[🕐 $time]($style)"
+format = " [🕐 $time]($style)"
 
 [character]
 success_symbol = "[❯](bold orange)"
