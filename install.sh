@@ -1,15 +1,15 @@
 #!/bin/zsh
 # Deja la terminal lista en una Mac nueva:
-#   0. Pregunta a qué terminal aplicar los cambios (Warp, Terminal de macOS, iTerm2 o todas)
+#   0. Pregunta a qué terminal aplicar los cambios (Warp, Terminal de macOS, Ghostty o todas)
 #   1. Homebrew y todo lo del Brewfile (nvim, ranger, chafa, ripgrep, fvm, fuente con iconos…)
-#   2. Warp y/o iTerm2, si se eligieron y no están instalados
+#   2. Warp y/o Ghostty, si se eligieron y no están instalados
 #   3. Enlaces de nvim y ranger a este repo, y copia de la config de Warp
 #   4. Fuente: Cartograph CF con iconos si tienes Cartograph; si no, JetBrainsMono Nerd Font
-#      + perfil Gruvbox Flutter en Terminal de macOS e iTerm2 (si se eligieron)
+#      + perfil Gruvbox Flutter en Terminal de macOS y config de Ghostty (si se eligieron)
 #   5. Plugins de nvim (versiones de lazy-lock.json) y parsers de Treesitter
 #   6. Antigravity IDE (si está instalado): settings, atajos, extensiones y tema Gruvbox Flutter
 # Se puede ejecutar varias veces: lo que ya está hecho se salta.
-# Uso opcional sin preguntar: ./install.sh [--warp] [--terminal] [--iterm2] [--all]
+# Uso opcional sin preguntar: ./install.sh [--warp] [--terminal] [--ghostty] [--all]
 set -e
 DOTFILES="${0:A:h}"
 STAMP=$(date +%Y%m%d-%H%M%S)
@@ -19,17 +19,17 @@ step() { print -P "\n%F{yellow}==>%f %B$1%b" }
 # ── 0. Selección de terminal ──────────────────────────────
 APPLY_WARP=false
 APPLY_TERMINAL=false
-APPLY_ITERM2=false
+APPLY_GHOSTTY=false
 SELECTED_ANY=false
 
 for arg in "$@"; do
   case "$arg" in
     --warp)     APPLY_WARP=true; SELECTED_ANY=true ;;
     --terminal) APPLY_TERMINAL=true; SELECTED_ANY=true ;;
-    --iterm2)   APPLY_ITERM2=true; SELECTED_ANY=true ;;
-    --all)      APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_ITERM2=true; SELECTED_ANY=true ;;
+    --ghostty)  APPLY_GHOSTTY=true; SELECTED_ANY=true ;;
+    --all)      APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_GHOSTTY=true; SELECTED_ANY=true ;;
     -h|--help)
-      echo "Uso: $0 [--warp] [--terminal] [--iterm2] [--all]"
+      echo "Uso: $0 [--warp] [--terminal] [--ghostty] [--all]"
       exit 0
       ;;
   esac
@@ -41,32 +41,32 @@ if ! $SELECTED_ANY; then
     echo "¿A qué terminal quieres aplicar la configuración y los colores?"
     echo "  1) Warp"
     echo "  2) Terminal de macOS"
-    echo "  3) iTerm2"
-    echo "  4) Todas (Warp, Terminal de macOS e iTerm2) [por defecto]"
+    echo "  3) Ghostty"
+    echo "  4) Todas (Warp, Terminal de macOS y Ghostty) [por defecto]"
     while true; do
-      read -r "choice?Elige una opción (o varias separadas por coma, ej. 1,3) [1-4]: "
+      read -r "choice?Elige una opción (o varias separadas por coma, ej. 2,3) [1-4]: "
       choice="${choice// /}"
       if [[ -z "$choice" ]]; then
-        APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_ITERM2=true; break
+        APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_GHOSTTY=true; break
       fi
-      APPLY_WARP=false; APPLY_TERMINAL=false; APPLY_ITERM2=false
+      APPLY_WARP=false; APPLY_TERMINAL=false; APPLY_GHOSTTY=false
       valid=true
       for item in ${(s:,:)choice:l}; do
         case "$item" in
           1|warp)               APPLY_WARP=true ;;
           2|terminal|macos)     APPLY_TERMINAL=true ;;
-          3|iterm|iterm2)       APPLY_ITERM2=true ;;
-          4|todas|todos|all)    APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_ITERM2=true ;;
+          3|ghostty)            APPLY_GHOSTTY=true ;;
+          4|todas|todos|all)    APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_GHOSTTY=true ;;
           *)                    valid=false ;;
         esac
       done
-      if $valid && ( $APPLY_WARP || $APPLY_TERMINAL || $APPLY_ITERM2 ); then
+      if $valid && ( $APPLY_WARP || $APPLY_TERMINAL || $APPLY_GHOSTTY ); then
         break
       fi
       echo "Opción no válida. Escribe 1, 2, 3, 4 o varias separadas por coma (ej. 2,3)."
     done
   else
-    APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_ITERM2=true
+    APPLY_WARP=true; APPLY_TERMINAL=true; APPLY_GHOSTTY=true
   fi
 fi
 
@@ -79,7 +79,7 @@ fi
 xcode-select -p >/dev/null 2>&1 || xcode-select --install || true   # compilador para Treesitter
 brew bundle --file="$DOTFILES/Brewfile"
 
-# ── 2. Warp / iTerm2 ──────────────────────────────────────
+# ── 2. Warp / Ghostty ─────────────────────────────────────
 if $APPLY_WARP; then
   step "Warp"
   if [[ -d /Applications/Warp.app ]]; then
@@ -89,12 +89,12 @@ if $APPLY_WARP; then
   fi
 fi
 
-if $APPLY_ITERM2; then
-  step "iTerm2"
-  if [[ -d /Applications/iTerm.app ]]; then
+if $APPLY_GHOSTTY; then
+  step "Ghostty"
+  if [[ -d /Applications/Ghostty.app ]]; then
     echo "Ya instalado"
   else
-    brew install --cask iterm2
+    brew install --cask ghostty
   fi
 fi
 
@@ -227,7 +227,8 @@ APPLESCRIPT
   echo "Terminal de macOS: perfil 'Gruvbox Flutter' aplicado ($font_ps)"
 }
 
-if $APPLY_TERMINAL || $APPLY_ITERM2; then
+if $APPLY_TERMINAL; then
+  step "Terminal de macOS"
   if [[ -f "$FONTS/CartographCFNerdFontMono-Regular.otf" ]]; then
     TERMINAL_FONT_PS="CartographCFNFM"
   elif [[ -f "$FONTS/CartographCFNerdFont-Regular.otf" ]]; then
@@ -235,74 +236,43 @@ if $APPLY_TERMINAL || $APPLY_ITERM2; then
   else
     TERMINAL_FONT_PS="JetBrainsMonoNF-Regular"
   fi
-fi
-
-if $APPLY_TERMINAL; then
-  step "Terminal de macOS"
   apply_macos_terminal "$DOTFILES/terminal/Gruvbox Flutter.terminal" "$TERMINAL_FONT_PS"
 fi
 
-apply_iterm2() {
-  local colors_file="$1" font_ps="$2"
-  local dyn_dir="$HOME/Library/Application Support/iTerm2/DynamicProfiles"
-  mkdir -p "$dyn_dir"
+apply_ghostty() {
+  local src_cfg="$1" font_family="$2"
+  local dst_dir="$HOME/Library/Application Support/com.mitchellh.ghostty"
+  local dst_cfg="$dst_dir/config.ghostty"
+  local ghostty_bin="/Applications/Ghostty.app/Contents/MacOS/ghostty"
+  local tmp; tmp=$(mktemp)
 
-  python3 - "$colors_file" "$dyn_dir/gruvbox-flutter.json" "$font_ps" <<'PY'
-import json, plistlib, subprocess, sys
-
-colors_path, dyn_path, font_ps = sys.argv[1:4]
-with open(colors_path, "rb") as f:
-    colors = plistlib.load(f)
-
-guid = "gruvbox-flutter-profile"
-profile_name = "Gruvbox Flutter"
-
-profile = {
-    "Name": profile_name,
-    "Guid": guid,
-    "Normal Font": f"{font_ps} 13",
-    "Non Ascii Font": f"{font_ps} 13",
-    "Use Non-ASCII Font": False,
-    "ASCII Anti Aliased": True,
-    "Non-ASCII Anti Aliased": True,
-    "ASCII Ligatures": True,
-    "Use Bold Font": True,
-    "Use Bright Bold": True,
-    "Use Italic Font": True,
-    "Use Separate Colors for Light and Dark Mode": False,
-    "Columns": 120,
-    "Rows": 30,
-}
-profile.update(colors)
-
-with open(dyn_path, "w", encoding="utf-8") as f:
-    json.dump({"Profiles": [profile]}, f, indent=2, sort_keys=True)
-    f.write("\n")
-
-exported = subprocess.run(
-    ["defaults", "export", "com.googlecode.iterm2", "-"],
-    capture_output=True,
-)
-prefs = plistlib.loads(exported.stdout) if exported.stdout.strip() else {}
-presets = prefs.setdefault("Custom Color Presets", {})
-presets[profile_name] = colors
-prefs["Default Bookmark Guid"] = guid
-subprocess.run(
-    ["defaults", "import", "com.googlecode.iterm2", "-"],
-    input=plistlib.dumps(prefs, fmt=plistlib.FMT_XML),
-    check=True,
-)
-PY
-
-  echo "iTerm2: perfil 'Gruvbox Flutter' aplicado ($font_ps)"
-  if pgrep -xq iTerm2 2>/dev/null; then
-    echo "  (Reinicia iTerm2 con Cmd+Q para que 'Gruvbox Flutter' quede como perfil predeterminado)"
+  sed -E "s/^font-family = .*/font-family = $font_family/" "$src_cfg" > "$tmp"
+  mkdir -p "$dst_dir"
+  if [[ -f "$dst_cfg" ]] && ! cmp -s "$tmp" "$dst_cfg"; then
+    cp "$dst_cfg" "$dst_cfg.backup-$STAMP"
+    echo "Respaldo: $dst_cfg.backup-$STAMP"
   fi
+  cp "$tmp" "$dst_cfg"
+  rm -f "$tmp"
+
+  [[ -x "$ghostty_bin" ]] && "$ghostty_bin" +validate-config >/dev/null 2>&1 || true
+  if pgrep -xq ghostty 2>/dev/null; then
+    osascript -e 'tell application "Ghostty" to perform action "reload_config" on terminal 1' >/dev/null 2>&1 \
+      || echo "  (Pulsa Cmd+Shift+, en Ghostty para recargar la configuración)"
+  fi
+  echo "Ghostty: config y tema Gruvbox Flutter aplicados ($font_family)"
 }
 
-if $APPLY_ITERM2; then
-  step "iTerm2"
-  apply_iterm2 "$DOTFILES/iterm2/Gruvbox Flutter.itermcolors" "$TERMINAL_FONT_PS"
+if $APPLY_GHOSTTY; then
+  step "Ghostty"
+  if [[ -f "$FONTS/CartographCFNerdFontMono-Regular.otf" ]]; then
+    GHOSTTY_FONT="CartographCF Nerd Font Mono"
+  elif [[ -f "$FONTS/CartographCFNerdFont-Regular.otf" ]]; then
+    GHOSTTY_FONT="CartographCF Nerd Font"
+  else
+    GHOSTTY_FONT="JetBrainsMono Nerd Font"
+  fi
+  apply_ghostty "$DOTFILES/ghostty/config.ghostty" "$GHOSTTY_FONT"
 fi
 
 # ── 5. Plugins de nvim ────────────────────────────────────
@@ -353,8 +323,8 @@ fi
 terminals=()
 $APPLY_WARP && terminals+=("Warp")
 $APPLY_TERMINAL && terminals+=("Terminal.app")
-$APPLY_ITERM2 && terminals+=("iTerm2")
-print -P "\n%F{green}Todo listo.%f Terminales configuradas: ${(j:, :)terminals}. Abre tu terminal (o reinicia Warp/iTerm2 con Cmd+Q) y ejecuta: nvim"
+$APPLY_GHOSTTY && terminals+=("Ghostty")
+print -P "\n%F{green}Todo listo.%f Terminales configuradas: ${(j:, :)terminals}. Abre tu terminal y ejecuta: nvim"
 [[ "$FONT" == "JetBrainsMono Nerd Font" ]] && echo "¿Tienes Cartograph CF? Instálala en ~/Library/Fonts y vuelve a ejecutar install.sh para usarla con iconos."
 command -v flutter >/dev/null || echo "Flutter no está instalado: fvm install stable && fvm global stable"
 true
