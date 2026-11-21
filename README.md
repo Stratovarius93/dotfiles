@@ -205,8 +205,10 @@ cp "$U/settings.json" "$U/keybindings.json" ~/Developer/dotfiles/antigravity/
 - **Prompt ([`starship/starship.toml`](starship/starship.toml))**: diseño Gruvbox Flutter en dos líneas (`╭─` / `╰─❯`) con emojis (`📂`, `🌿`, `🎯`, `🟢`, `⏱️`) y hora (`🕐 HH:MM`) alineada a la derecha.
 - **Autocompletado ([`zsh/zshrc`](zsh/zshrc))**: Oh My Zsh + `fzf-tab`, `carapace`, `zsh-autosuggestions` y `zsh-syntax-highlighting` con colores Gruvbox Flutter. Para configuración local por máquina sin tocar el repo, usa `~/.zshrc.local`.
 
-| Atajo | Acción |
+| Atajo / Alias | Acción |
 |---|---|
+| `lg` | Abre `lazygit` |
+| `rg` | Abre `ranger` (con `cd` al salir con `q`/`Q`; para `ripgrep` en shell usa `command rg`) |
 | `Tab` | Menú desplegable interactivo (`fzf-tab` + descripciones de `carapace`) |
 | `→` | Aceptar sugerencia en línea (`zsh-autosuggestions`) |
 | `Ctrl+R` | Buscar en el historial con `fzf` |

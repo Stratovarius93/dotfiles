@@ -29,6 +29,10 @@ ranger() {
   fi
 }
 
+# Alias rápidos (nota: Telescope/scripts siguen usando /opt/homebrew/bin/rg; en shell usa `command rg` para ripgrep)
+alias lg='lazygit'
+alias rg='ranger'
+
 # ── Autocompletado estilo Warp (fzf + fzf-tab + carapace + autosuggestions + syntax) ──
 export FZF_DEFAULT_OPTS="\
 --height=40% --layout=reverse --border=rounded --margin=0,1 \
