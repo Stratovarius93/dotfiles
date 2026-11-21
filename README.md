@@ -1,12 +1,13 @@
 # dotfiles
 
-Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
+Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de macOS y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
 
 | Carpeta | Destino | Cómo se instala |
 |---|---|---|
 | `nvim/` | `~/.config/nvim` | enlace simbólico |
 | `ranger/` | `~/.config/ranger` | enlace simbólico |
 | `warp/` | `~/.warp` | copia (Warp reescribe `settings.toml`) |
+| `terminal/` | `Terminal.app` (`Gruvbox Flutter`) | importa el perfil `.terminal` como predeterminado y de inicio |
 | `antigravity/` | `~/Library/Application Support/Antigravity IDE/User` | copia de `settings.json` y `keybindings.json`, y extensiones de `extensions.txt` |
 
 ## Instalación en una Mac nueva
@@ -19,13 +20,15 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp y Antigravit
    ~/Developer/dotfiles/install.sh
    ```
 
-3. Abre Warp (o reinícialo con Cmd+Q) y escribe `nvim`.
+3. Elige a qué terminal aplicar la configuración y los colores (**Warp**, **Terminal de macOS** o **Todas**). También puedes pasarlo directo con `--warp`, `--terminal` o `--all`.
+4. Abre tu terminal (si usas Warp, reinícialo con Cmd+Q) y escribe `nvim`.
 
 `install.sh` hace todo lo demás:
 
+- Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS` o ambas).
 - Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, node, fontforge y JetBrainsMono Nerd Font.
-- Instala Warp si no está.
-- Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, y copia la config y el tema de Warp. Si ya había una config, la guarda como `*.backup-<fecha>`.
+- Instala Warp si lo elegiste y aún no está.
+- Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, copia la config y el tema de Warp (si se eligió), e importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS como perfil predeterminado y de inicio (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
 - Elige la fuente:
   - **CartographCF Nerd Font**, si ya tienes Cartograph con iconos.
   - Si tienes Cartograph sin iconos, se los añade automáticamente y usa esa.
