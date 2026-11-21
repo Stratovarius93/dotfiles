@@ -105,8 +105,10 @@ handle_extension() {
 
         ## JSON
         json)
+            bat --color=always --theme=gruvbox-dark --style=plain \
+                --terminal-width="${PV_WIDTH}" -- "${FILE_PATH}" && exit 5
             jq --color-output . "${FILE_PATH}" && exit 5
-            python -m json.tool -- "${FILE_PATH}" && exit 5
+            python3 -m json.tool -- "${FILE_PATH}" && exit 5
             ;;
 
         ## Direct Stream Digital/Transfer (DSDIFF) and wavpack aren't detected
@@ -295,13 +297,17 @@ handle_mime() {
             xls2csv -- "${FILE_PATH}" && exit 5
             exit 1;;
 
-        ## Text
-        text/* | */xml)
+        ## Text & code
+        text/* | */xml | application/json | application/javascript | application/*yaml* | application/*toml* | application/x-shellscript)
             ## Syntax highlight
-            if [[ "$( stat --printf='%s' -- "${FILE_PATH}" )" -gt "${HIGHLIGHT_SIZE_MAX}" ]]; then
+            local file_size
+            file_size="$( stat -f '%z' -- "${FILE_PATH}" 2>/dev/null || stat -c '%s' -- "${FILE_PATH}" 2>/dev/null || echo 0 )"
+            if [[ "${file_size}" -gt "${HIGHLIGHT_SIZE_MAX}" ]]; then
                 exit 2
             fi
-            if [[ "$( tput colors )" -ge 256 ]]; then
+            bat --color=always --theme=gruvbox-dark --style=plain \
+                --terminal-width="${PV_WIDTH}" -- "${FILE_PATH}" && exit 5
+            if [[ "$( tput colors 2>/dev/null || echo 256 )" -ge 256 ]]; then
                 local pygmentize_format='terminal256'
                 local highlight_format='xterm256'
             else
@@ -311,8 +317,6 @@ handle_mime() {
             env HIGHLIGHT_OPTIONS="${HIGHLIGHT_OPTIONS}" highlight \
                 --out-format="${highlight_format}" \
                 --force -- "${FILE_PATH}" && exit 5
-            env COLORTERM=8bit bat --color=always --style="plain" \
-                -- "${FILE_PATH}" && exit 5
             pygmentize -f "${pygmentize_format}" -O "style=${PYGMENTIZE_STYLE}"\
                 -- "${FILE_PATH}" && exit 5
             exit 2;;

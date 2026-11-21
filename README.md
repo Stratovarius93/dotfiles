@@ -29,7 +29,7 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Zsh + Starship, W
 `install.sh` hace todo lo demás:
 
 - Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS`, `Ghostty`, una combinación o todas).
-- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, node, starship, fzf, carapace, zsh-autosuggestions, zsh-syntax-highlighting, fontforge y JetBrainsMono Nerd Font.
+- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, lazygit, chafa, bat, ripgrep, fd, fvm, node, starship, fzf, carapace, zsh-autosuggestions, zsh-syntax-highlighting, fontforge y JetBrainsMono Nerd Font.
 - Instala Oh My Zsh y el plugin `fzf-tab` si aún no están.
 - Instala Warp y/o Ghostty si los elegiste y aún no están.
 - Enlaza `~/.config/nvim`, `~/.config/ranger`, `~/.config/starship.toml` y `~/.zshrc` a este repo (puedes añadir ajustes locales por máquina en `~/.zshrc.local`), copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), y copia [`ghostty/config.ghostty`](ghostty/config.ghostty) en Ghostty con recarga en vivo (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
@@ -194,7 +194,11 @@ cp "$U/settings.json" "$U/keybindings.json" ~/Developer/dotfiles/antigravity/
 
 ## Ranger
 
-`ranger/scope.sh` es el script de vista previa que trae Ranger, con un cambio: las imágenes se muestran con [chafa](https://hpjansson.org/chafa/) como caracteres de color. Así se ven también dentro de nvim, donde Warp no puede mostrar imágenes reales.
+- **Vista previa en la misma terminal** ([`ranger/scope.sh`](ranger/scope.sh) y [`ranger/rc.conf`](ranger/rc.conf)): código, JSON, Markdown y archivos de texto se muestran con resaltado **Gruvbox Dark** (`bat`), e imágenes con [chafa](https://hpjansson.org/chafa/) como caracteres de color (funciona también dentro de nvim).
+- **`i`**: vista previa a pantalla completa del archivo en la misma terminal (`q` o `Esc` vuelven a Ranger).
+- **`Enter` / `l`**: abre archivos de texto/código en `nvim` dentro de la misma terminal.
+- **`q` / `Q`**: cierra Ranger y cambia la terminal (`cd`) a la carpeta donde estabas.
+- **`Esc`**: cierra Ranger inmediatamente sin cambiar de carpeta.
 
 ## Zsh y Starship
 

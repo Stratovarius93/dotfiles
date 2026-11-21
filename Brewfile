@@ -1,16 +1,18 @@
 # Lo que necesita la config. install.sh lo instala con `brew bundle`.
 
-# Editor y explorador de archivos
+# Editor, explorador de archivos y Git TUI
 brew "neovim"
 brew "ranger"
 brew "git"
+brew "lazygit"
 
 # Telescope: búsqueda de archivos y de texto
 brew "ripgrep"
 brew "fd"
 
-# Vista previa de imágenes en Telescope y Ranger
+# Vista previa de imágenes y código en Telescope y Ranger
 brew "chafa"
+brew "bat"
 
 # Flutter por proyecto (flutter-tools usa .fvm si existe)
 brew "fvm"

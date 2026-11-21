@@ -14,6 +14,20 @@ plugins=(git fzf-tab)
 [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 export PATH="$HOME/.local/bin:$PATH"
+export EDITOR="nvim"
+export VISUAL="nvim"
+export BAT_THEME="gruvbox-dark"
+
+# Ranger: al salir con q o Q cambia la terminal a la carpeta actual; Esc sale sin cambiar
+ranger() {
+  local tmp; tmp=$(mktemp -t ranger-cd.XXXXXX)
+  RANGER_CD_FILE="$tmp" command ranger "$@"
+  local dir; dir=$(cat "$tmp" 2>/dev/null)
+  rm -f "$tmp"
+  if [[ -n "$dir" && -d "$dir" && "$dir" != "$PWD" ]]; then
+    cd -- "$dir"
+  fi
+}
 
 # ── Autocompletado estilo Warp (fzf + fzf-tab + carapace + autosuggestions + syntax) ──
 export FZF_DEFAULT_OPTS="\
