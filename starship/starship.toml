@@ -1,0 +1,84 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+palette = "gruvbox_flutter"
+
+format = """
+[╭─](grey) $directory$git_branch$git_status$dart$nodejs$python$rust$golang$cmd_duration$fill$time
+[╰─](grey)$character"""
+
+[palettes.gruvbox_flutter]
+bg0 = "#282828"
+bg3 = "#3c3836"
+bg5 = "#504945"
+grey = "#928374"
+fg = "#ebdbb2"
+fg_soft = "#d4be98"
+red = "#ea6962"
+orange = "#fe8019"
+yellow = "#d8a657"
+green = "#a9b665"
+aqua = "#89b482"
+blue = "#7daea3"
+purple = "#d3869b"
+
+[fill]
+symbol = " "
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "fg_soft"
+format = "[🕐 $time]($style)"
+
+[character]
+success_symbol = "[❯](bold orange)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+[directory]
+style = "bold blue"
+format = "[📂 $path]($style)[$read_only]($read_only_style) "
+truncation_length = 4
+truncation_symbol = "…/"
+read_only = " 🔒"
+read_only_style = "red"
+
+[git_branch]
+symbol = "🌿 "
+style = "bold yellow"
+format = "[$symbol$branch(:$remote_branch)]($style) "
+
+[git_status]
+style = "bold red"
+format = '([\[$all_status$ahead_behind\]]($style) )'
+
+[dart]
+symbol = "🎯 "
+style = "bold aqua"
+format = "[$symbol($version)]($style) "
+
+[nodejs]
+symbol = "🟢 "
+style = "bold green"
+format = "[$symbol($version)]($style) "
+
+[python]
+symbol = "🐍 "
+style = "bold yellow"
+format = "[$symbol($version)]($style) "
+
+[rust]
+symbol = "🦀 "
+style = "bold orange"
+format = "[$symbol($version)]($style) "
+
+[golang]
+symbol = "🐹 "
+style = "bold blue"
+format = "[$symbol($version)]($style) "
+
+[cmd_duration]
+min_time = 2000
+style = "grey"
+format = "[⏱️ $duration]($style) "

@@ -1,11 +1,13 @@
 # dotfiles
 
-Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de macOS, Ghostty y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
+Mi configuración para desarrollar en Flutter: Neovim, Ranger, Zsh + Starship, Warp, Terminal de macOS, Ghostty y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
 
 | Carpeta | Destino | Cómo se instala |
 |---|---|---|
 | `nvim/` | `~/.config/nvim` | enlace simbólico |
 | `ranger/` | `~/.config/ranger` | enlace simbólico |
+| `starship/` | `~/.config/starship.toml` | enlace simbólico (prompt Gruvbox en dos líneas con emojis y hora) |
+| `zsh/` | `~/.zshrc` | enlace simbólico (Oh My Zsh + `fzf-tab`, `carapace`, `zsh-autosuggestions`, `zsh-syntax-highlighting` y Starship) |
 | `warp/` | `~/.warp` | copia (Warp reescribe `settings.toml`) |
 | `terminal/` | `Terminal.app` (`Gruvbox Flutter`) | importa el perfil `.terminal` como predeterminado y de inicio |
 | `ghostty/` | `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty` | copia con la fuente detectada, colores Gruvbox Flutter y ventana `148×46` |
@@ -27,9 +29,10 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de
 `install.sh` hace todo lo demás:
 
 - Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS`, `Ghostty`, una combinación o todas).
-- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, node, fontforge y JetBrainsMono Nerd Font.
+- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, node, starship, fzf, carapace, zsh-autosuggestions, zsh-syntax-highlighting, fontforge y JetBrainsMono Nerd Font.
+- Instala Oh My Zsh y el plugin `fzf-tab` si aún no están.
 - Instala Warp y/o Ghostty si los elegiste y aún no están.
-- Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), y copia [`ghostty/config.ghostty`](ghostty/config.ghostty) en Ghostty con recarga en vivo (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
+- Enlaza `~/.config/nvim`, `~/.config/ranger`, `~/.config/starship.toml` y `~/.zshrc` a este repo (puedes añadir ajustes locales por máquina en `~/.zshrc.local`), copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), y copia [`ghostty/config.ghostty`](ghostty/config.ghostty) en Ghostty con recarga en vivo (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
 - Elige la fuente:
   - **CartographCF Nerd Font**, si ya tienes Cartograph con iconos.
   - Si tienes Cartograph sin iconos, se los añade automáticamente y usa esa.
@@ -192,3 +195,16 @@ cp "$U/settings.json" "$U/keybindings.json" ~/Developer/dotfiles/antigravity/
 ## Ranger
 
 `ranger/scope.sh` es el script de vista previa que trae Ranger, con un cambio: las imágenes se muestran con [chafa](https://hpjansson.org/chafa/) como caracteres de color. Así se ven también dentro de nvim, donde Warp no puede mostrar imágenes reales.
+
+## Zsh y Starship
+
+- **Prompt ([`starship/starship.toml`](starship/starship.toml))**: diseño Gruvbox Flutter en dos líneas (`╭─` / `╰─❯`) con emojis (`📂`, `🌿`, `🎯`, `🟢`, `⏱️`) y hora (`🕐 HH:MM`) alineada a la derecha.
+- **Autocompletado ([`zsh/zshrc`](zsh/zshrc))**: Oh My Zsh + `fzf-tab`, `carapace`, `zsh-autosuggestions` y `zsh-syntax-highlighting` con colores Gruvbox Flutter. Para configuración local por máquina sin tocar el repo, usa `~/.zshrc.local`.
+
+| Atajo | Acción |
+|---|---|
+| `Tab` | Menú desplegable interactivo (`fzf-tab` + descripciones de `carapace`) |
+| `→` | Aceptar sugerencia en línea (`zsh-autosuggestions`) |
+| `Ctrl+R` | Buscar en el historial con `fzf` |
+| `Ctrl+T` | Buscar e insertar archivos con `fzf` |
+| `Alt+C` | Cambiar de carpeta con `fzf` |

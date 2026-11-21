@@ -1,9 +1,9 @@
 #!/bin/zsh
 # Deja la terminal lista en una Mac nueva:
 #   0. Pregunta a qué terminal aplicar los cambios (Warp, Terminal de macOS, Ghostty o todas)
-#   1. Homebrew y todo lo del Brewfile (nvim, ranger, chafa, ripgrep, fvm, fuente con iconos…)
+#   1. Homebrew y todo lo del Brewfile (nvim, ranger, chafa, ripgrep, fvm, starship, fzf, carapace…)
 #   2. Warp y/o Ghostty, si se eligieron y no están instalados
-#   3. Enlaces de nvim y ranger a este repo, y copia de la config de Warp
+#   3. Oh My Zsh + fzf-tab, enlaces de nvim, ranger, starship y zsh, y copia de la config de Warp
 #   4. Fuente: Cartograph CF con iconos si tienes Cartograph; si no, JetBrainsMono Nerd Font
 #      + perfil Gruvbox Flutter en Terminal de macOS y config de Ghostty (si se eligieron)
 #   5. Plugins de nvim (versiones de lazy-lock.json) y parsers de Treesitter
@@ -98,8 +98,17 @@ if $APPLY_GHOSTTY; then
   fi
 fi
 
-# ── 3. Enlaces y config ───────────────────────────────────
-step "Config de nvim, ranger y terminales"
+# ── 3. Oh My Zsh, enlaces y config ────────────────────────
+step "Oh My Zsh, Starship y config"
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+FZF_TAB_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/fzf-tab"
+if [[ ! -d "$FZF_TAB_DIR" ]]; then
+  git clone -q --depth 1 https://github.com/Aloxaf/fzf-tab "$FZF_TAB_DIR"
+  echo "Instalado: fzf-tab"
+fi
+
 link() {
   local src="$1" dst="$2"
   mkdir -p "${dst:h}"
@@ -114,6 +123,8 @@ link() {
 }
 link "$DOTFILES/nvim" "$HOME/.config/nvim"
 link "$DOTFILES/ranger" "$HOME/.config/ranger"
+link "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
+link "$DOTFILES/zsh/zshrc" "$HOME/.zshrc"
 
 if $APPLY_WARP; then
   # Warp reescribe settings.toml, así que se copia en lugar de enlazarse

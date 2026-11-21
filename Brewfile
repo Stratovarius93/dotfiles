@@ -18,6 +18,13 @@ brew "fvm"
 # Para empaquetar el tema Gruvbox Flutter de Antigravity (npx @vscode/vsce)
 brew "node"
 
+# Prompt y autocompletado en zsh (estilo Warp)
+brew "starship"
+brew "fzf"
+brew "carapace"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
 # Para añadir iconos a una fuente propia (Cartograph)
 brew "fontforge"
 
