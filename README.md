@@ -1,6 +1,6 @@
 # dotfiles
 
-Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de macOS y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
+Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de macOS, iTerm2 y Antigravity IDE, con el tema [Gruvbox Flutter](https://github.com/Stratovarius93/gruvbox-flutter-theme).
 
 | Carpeta | Destino | Cómo se instala |
 |---|---|---|
@@ -8,6 +8,7 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de
 | `ranger/` | `~/.config/ranger` | enlace simbólico |
 | `warp/` | `~/.warp` | copia (Warp reescribe `settings.toml`) |
 | `terminal/` | `Terminal.app` (`Gruvbox Flutter`) | importa el perfil `.terminal` como predeterminado y de inicio |
+| `iterm2/` | `iTerm2` (`Gruvbox Flutter`) | Dynamic Profile + color preset `.itermcolors` como perfil predeterminado |
 | `antigravity/` | `~/Library/Application Support/Antigravity IDE/User` | copia de `settings.json` y `keybindings.json`, y extensiones de `extensions.txt` |
 
 ## Instalación en una Mac nueva
@@ -20,15 +21,15 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Warp, Terminal de
    ~/Developer/dotfiles/install.sh
    ```
 
-3. Elige a qué terminal aplicar la configuración y los colores (**Warp**, **Terminal de macOS** o **Todas**). También puedes pasarlo directo con `--warp`, `--terminal` o `--all`.
-4. Abre tu terminal (si usas Warp, reinícialo con Cmd+Q) y escribe `nvim`.
+3. Elige a qué terminal aplicar la configuración y los colores (**Warp**, **Terminal de macOS**, **iTerm2** o **Todas**; también puedes elegir varias separadas por coma, ej. `2,3`). También puedes pasarlo directo con `--warp`, `--terminal`, `--iterm2` o `--all`.
+4. Abre tu terminal (si usas Warp o iTerm2, reiníciala con Cmd+Q) y escribe `nvim`.
 
 `install.sh` hace todo lo demás:
 
-- Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS` o ambas).
+- Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS`, `iTerm2`, una combinación o todas).
 - Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, chafa, ripgrep, fd, fvm, node, fontforge y JetBrainsMono Nerd Font.
-- Instala Warp si lo elegiste y aún no está.
-- Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, copia la config y el tema de Warp (si se eligió), e importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS como perfil predeterminado y de inicio (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
+- Instala Warp y/o iTerm2 si los elegiste y aún no están.
+- Enlaza `~/.config/nvim` y `~/.config/ranger` a este repo, copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), e instala el Dynamic Profile y preset [`iterm2/Gruvbox Flutter.itermcolors`](iterm2/Gruvbox%20Flutter.itermcolors) en iTerm2 (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
 - Elige la fuente:
   - **CartographCF Nerd Font**, si ya tienes Cartograph con iconos.
   - Si tienes Cartograph sin iconos, se los añade automáticamente y usa esa.
