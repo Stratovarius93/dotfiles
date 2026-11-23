@@ -851,7 +851,9 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
 
 -- Claude Code en un split de terminal (<leader>c)
 -- <leader>c: mostrar / ocultar Claude Code a la derecha, conservando la misma sesión.
--- Dentro del panel, Ctrl+q lo oculta (Espacio ahí se escribe en Claude).
+-- Dentro del panel, Ctrl+q lo oculta (Espacio ahí se escribe en Claude) y
+-- Ctrl+h / Ctrl+l saltan a la ventana de al lado; al volver se sigue escribiendo.
+-- (Ctrl+j / Ctrl+k se dejan para Claude: salto de línea y borrar hasta el final.)
 local claude_buf
 local function toggle_claude()
   if claude_buf and vim.api.nvim_buf_is_valid(claude_buf) then
@@ -872,6 +874,12 @@ local function toggle_claude()
     claude_buf = vim.api.nvim_get_current_buf()
     vim.bo[claude_buf].buflisted = false -- no aparece en recientes ni en <leader>bp
     vim.keymap.set("t", "<C-q>", toggle_claude, { buffer = claude_buf, desc = "Ocultar Claude Code" })
+    vim.keymap.set("t", "<C-h>", "<Cmd>wincmd h<CR>", { buffer = claude_buf, desc = "Split izquierdo" })
+    vim.keymap.set("t", "<C-l>", "<Cmd>wincmd l<CR>", { buffer = claude_buf, desc = "Split derecho" })
+    vim.api.nvim_create_autocmd("BufEnter", { -- al volver al panel, directo a escribir
+      buffer = claude_buf,
+      callback = function() vim.cmd("startinsert") end,
+    })
     vim.api.nvim_create_autocmd("TermClose", { -- al salir de Claude (/exit) se cierra su panel
       buffer = claude_buf,
       once = true,

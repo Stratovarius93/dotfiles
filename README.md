@@ -175,6 +175,7 @@ Busca también las variantes `2.0x/` y `3.0x/` de Flutter. La vista flotante usa
 | `F1` | Terminal |
 | `<leader>c` | Mostrar / ocultar Claude Code a la derecha. Al ocultarlo sigue corriendo y vuelve la misma sesión |
 | `Ctrl+q` (dentro de Claude) | Ocultar Claude Code |
+| `Ctrl+h` / `Ctrl+l` (dentro de Claude) | Ir al panel de la izquierda / derecha (al volver se sigue escribiendo) |
 | `Ctrl+\` `Ctrl+n` (dentro de una terminal) | Pasar a modo normal, por ejemplo para copiar texto |
 
 Al salir de Claude (`/exit`) su panel se cierra solo.
