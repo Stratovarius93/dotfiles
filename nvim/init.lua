@@ -71,7 +71,7 @@ require("lazy").setup({
         fvm = true,                                   -- dart.flutterSdkPath = .fvm
         widget_guides = { enabled = true },           -- previewFlutterUiGuides
         closing_tags = { enabled = true },
-        -- Flutter Outline (árbol de widgets) a la derecha del código; solo con <leader>N
+        -- Flutter Outline (árbol de widgets): lua/sidebar.lua lo mueve debajo de nvim-tree
         outline = { open_cmd = "rightbelow 40vnew", auto_open = false, icons = vim.g.have_nerd_font },
         dev_log = { enabled = true, open_cmd = "botright 15split" },
         lsp = {
@@ -523,6 +523,7 @@ map("i", "kj", "<Esc>", "Salir de insert")
 -- Tabs por panel (lua/wintabs.lua): cada panel tiene su fila de tabs, como VS Code
 local wintabs = require("wintabs")
 require("anim").setup() -- animaciones de paneles (nvim-tree, terminal, Trouble)
+require("sidebar").setup() -- nvim-tree + Flutter Outline en la misma columna
 wintabs.setup()
 map("n", "<Tab>", function() wintabs.cycle(1) end, "Tab siguiente (del panel)")
 map("n", "`", function() wintabs.cycle(-1) end, "Tab anterior (del panel)")
@@ -639,13 +640,7 @@ local function find_files_with_recent()
   }):find()
 end
 
-map("n", "<leader>N", function()
-  if vim.fn.exists(":FlutterOutlineToggle") == 2 then
-    vim.cmd("FlutterOutlineToggle")
-  else
-    vim.notify("Flutter Outline: abre primero un archivo .dart", vim.log.levels.INFO)
-  end
-end, "Flutter Outline (árbol de widgets)")
+map("n", "<leader>N", function() require("sidebar").toggle_outline() end, "Flutter Outline debajo del explorador")
 map("n", "<leader>f", find_files_with_recent, "Buscar archivo (recientes primero)")
 map("n", "<leader>F", "<cmd>Telescope live_grep<cr>", "Buscar texto")
 map("n", "<leader>/", "<cmd>Telescope commands<cr>", "Paleta de comandos")
@@ -682,8 +677,7 @@ end
 map("n", "<leader>o", open_ranger, "Ranger (explorador flotante)")
 
 -- Barra lateral
-map("n", "<leader>n", require("anim").toggle("NvimTree", function() vim.cmd("NvimTreeOpen") end,
-  function() vim.cmd("NvimTreeClose") end), "Mostrar/ocultar explorador")
+map("n", "<leader>n", function() require("sidebar").toggle() end, "Mostrar/ocultar explorador (+ Flutter Outline)")
 map("n", "<leader>e", "<cmd>NvimTreeFocus<cr>", "Foco en explorador")
 
 -- EasyMotion → flash

@@ -45,10 +45,16 @@ local function set_size(win, dim, n)
   if dim == "width" then api.nvim_win_set_width(win, n) else api.nvim_win_set_height(win, n) end
   -- con 1-2 columnas nvim desplaza la vista a la derecha para mostrar el cursor;
   -- sin esto el panel queda cortado ("ndroid", "ssets") al crecer
+  -- (todas las ventanas de la columna: p. ej. nvim-tree + Flutter Outline debajo)
   if dim == "width" then
-    api.nvim_win_call(win, function()
-      if vim.fn.winsaveview().leftcol ~= 0 then vim.fn.winrestview({ leftcol = 0 }) end
-    end)
+    local col = vim.fn.win_screenpos(win)[2]
+    for _, w in ipairs(api.nvim_tabpage_list_wins(0)) do
+      if api.nvim_win_get_config(w).relative == "" and vim.fn.win_screenpos(w)[2] == col then
+        api.nvim_win_call(w, function()
+          if vim.fn.winsaveview().leftcol ~= 0 then vim.fn.winrestview({ leftcol = 0 }) end
+        end)
+      end
+    end
   end
 end
 

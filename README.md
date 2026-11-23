@@ -69,7 +69,7 @@ Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.war
 - **Flutter y Dart:** flutter-tools (con fvm), LSP de Dart, nvim-treesitter
 - **Autocompletado:** nvim-cmp, LuaSnip, friendly-snippets
 - **Archivos:** nvim-tree (árbol lateral), mini.files (columnas), Ranger (ventana flotante), Telescope (búsqueda)
-- **Interfaz:** tabs por panel tipo píldora ([`lua/wintabs.lua`](nvim/lua/wintabs.lua)), animaciones de paneles al abrir/cerrar nvim-tree, terminal y trouble ([`lua/anim.lua`](nvim/lua/anim.lua)), bordes redondeados en ventanas flotantes, lualine (barra de estado estilo burbujas), trouble (panel de problemas), gitsigns, neoscroll (scroll suave), flash, toggleterm
+- **Interfaz:** tabs por panel tipo píldora ([`lua/wintabs.lua`](nvim/lua/wintabs.lua)), animaciones de paneles al abrir/cerrar nvim-tree, terminal y trouble ([`lua/anim.lua`](nvim/lua/anim.lua)), barra lateral nvim-tree + Flutter Outline ([`lua/sidebar.lua`](nvim/lua/sidebar.lua)), bordes redondeados en ventanas flotantes, lualine (barra de estado estilo burbujas), trouble (panel de problemas), gitsigns, neoscroll (scroll suave), flash, toggleterm
 - **Colores:** nvim-highlight-colors (`#RRGGBB`, `rgb()`, `hsl()`) y resaltador propio para `0xAARRGGBB` de Flutter
 - **Tests:** nvim-coverage
 
@@ -86,7 +86,7 @@ Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.war
 
 | Atajo | Acción |
 |---|---|
-| `<leader>n` / `<leader>e` | Mostrar u ocultar el árbol / ir al árbol |
+| `<leader>n` / `<leader>e` | Mostrar u ocultar la barra lateral (árbol + Flutter Outline debajo en archivos Dart) / ir al árbol |
 | `-` | mini.files (columnas tipo Ranger, editables) |
 | `<leader>o` | Ranger flotante |
 | `<leader>f` | Buscar archivo; los recientes del proyecto salen primero, marcados con 󰋚 |
@@ -155,7 +155,7 @@ Busca también las variantes `2.0x/` y `3.0x/` de Flutter. La vista flotante usa
 | `F8` | Detener la app |
 | `F3` | Logs de la app (como la Debug Console) |
 | `F2` | Salida: historial de mensajes de nvim (como Output) |
-| `<leader>N` | Flutter Outline: árbol de widgets del archivo, a la derecha |
+| `<leader>N` | Mostrar u ocultar el Flutter Outline (árbol de widgets) debajo del árbol de archivos |
 | `<leader>tc` | Tests con cobertura |
 | `<leader>tl` / `<leader>tt` / `<leader>ts` | Cargar / mostrar u ocultar / resumen de la cobertura |
 
