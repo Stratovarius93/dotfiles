@@ -717,6 +717,11 @@ local function toggle_lazygit()
       dir = "git_dir", -- raíz del repo del archivo actual
       direction = "float",
       hidden = true, -- no se mezcla con la terminal de F1
+      -- mismo fondo y borde que el buscador de <leader>f (Telescope)
+      highlights = {
+        NormalFloat = { link = "TelescopeNormal" },
+        FloatBorder = { link = "TelescopeBorder" },
+      },
       float_opts = {
         border = "rounded",
         width = function() return math.floor(vim.o.columns * 0.9) end,
