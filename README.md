@@ -7,6 +7,7 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Zsh + Starship, W
 | `nvim/` | `~/.config/nvim` | enlace simbólico |
 | `ranger/` | `~/.config/ranger` | enlace simbólico |
 | `starship/` | `~/.config/starship.toml` | enlace simbólico (prompt Gruvbox en dos líneas con emojis y hora) |
+| `lazygit/` | `~/Library/Application Support/lazygit/config.yml` | enlace simbólico (diffs con delta: fondo de color, sintaxis y lado a lado; `|` alterna con el diff normal) |
 | `zsh/` | `~/.zshrc` | enlace simbólico (Oh My Zsh + `fzf-tab`, `carapace`, `zsh-autosuggestions`, `zsh-syntax-highlighting` y Starship) |
 | `warp/` | `~/.warp` | copia (Warp reescribe `settings.toml`) |
 | `terminal/` | `Terminal.app` (`Gruvbox Flutter`) | importa el perfil `.terminal` como predeterminado y de inicio |
@@ -29,10 +30,10 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Zsh + Starship, W
 `install.sh` hace todo lo demás:
 
 - Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS`, `Ghostty`, una combinación o todas).
-- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, lazygit, chafa, bat, ripgrep, fd, fvm, node, starship, fzf, carapace, zsh-autosuggestions, zsh-syntax-highlighting, fontforge y JetBrainsMono Nerd Font.
+- Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, lazygit, git-delta, chafa, bat, ripgrep, fd, fvm, node, starship, fzf, carapace, zsh-autosuggestions, zsh-syntax-highlighting, fontforge y JetBrainsMono Nerd Font.
 - Instala Oh My Zsh y el plugin `fzf-tab` si aún no están.
 - Instala Warp y/o Ghostty si los elegiste y aún no están.
-- Enlaza `~/.config/nvim`, `~/.config/ranger`, `~/.config/starship.toml` y `~/.zshrc` a este repo (puedes añadir ajustes locales por máquina en `~/.zshrc.local`), copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), y copia [`ghostty/config.ghostty`](ghostty/config.ghostty) en Ghostty con recarga en vivo (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
+- Enlaza `~/.config/nvim`, `~/.config/ranger`, `~/.config/starship.toml`, `~/.zshrc` y la config de lazygit a este repo (puedes añadir ajustes locales por máquina en `~/.zshrc.local`), copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), y copia [`ghostty/config.ghostty`](ghostty/config.ghostty) en Ghostty con recarga en vivo (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.
 - Elige la fuente:
   - **CartographCF Nerd Font**, si ya tienes Cartograph con iconos.
   - Si tienes Cartograph sin iconos, se los añade automáticamente y usa esa.

@@ -125,6 +125,7 @@ link "$DOTFILES/nvim" "$HOME/.config/nvim"
 link "$DOTFILES/ranger" "$HOME/.config/ranger"
 link "$DOTFILES/starship/starship.toml" "$HOME/.config/starship.toml"
 link "$DOTFILES/zsh/zshrc" "$HOME/.zshrc"
+link "$DOTFILES/lazygit/config.yml" "$HOME/Library/Application Support/lazygit/config.yml"
 
 if $APPLY_WARP; then
   # Warp reescribe settings.toml, así que se copia en lugar de enlazarse

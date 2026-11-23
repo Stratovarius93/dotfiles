@@ -14,6 +14,9 @@ brew "fd"
 brew "chafa"
 brew "bat"
 
+# Diffs de lazygit con fondo de color y sintaxis (lazygit/config.yml)
+brew "git-delta"
+
 # Flutter por proyecto (flutter-tools usa .fvm si existe)
 brew "fvm"
 

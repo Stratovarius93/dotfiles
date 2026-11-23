@@ -1,0 +1,20 @@
+# Lazygit (macOS: ~/Library/Application Support/lazygit/config.yml → enlace a este archivo)
+git:
+  # Diffs con delta: fondo verde/rojo en líneas añadidas/borradas, resaltado de
+  # sintaxis y de las palabras cambiadas. Colores de diff del tema Gruvbox Flutter
+  # (los mismos de diffview en nvim). Con la ventana ancha (> 160 col.) va lado a lado.
+  # `|` en lazygit alterna con el diff normal de git.
+  diffRenderers:
+    - name: delta
+      command: >-
+        delta --dark --paging=never --line-numbers
+        --syntax-theme=gruvbox-dark
+        --plus-style='syntax "#34381b"' --plus-emph-style='syntax "#4b5a26"'
+        --minus-style='syntax "#402120"' --minus-emph-style='syntax "#6a2e2b"'
+        --line-numbers-plus-style='#a9b665' --line-numbers-minus-style='#ea6962'
+        --line-numbers-zero-style='#7c6f64'
+        --hunk-header-style='file line-number syntax' --hunk-header-decoration-style='#665c54 box'
+        --file-style='#d8a657 bold' --file-decoration-style='#665c54 ul'
+        {{if gt .width 160}}--side-by-side{{end}}
+    - type: rawGit
+      name: git
