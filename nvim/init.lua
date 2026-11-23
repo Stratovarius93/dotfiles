@@ -27,6 +27,7 @@ vim.o.shiftwidth = 2
 vim.o.tabstop = 2
 vim.o.timeoutlen = 400
 vim.o.updatetime = 250
+vim.o.winborder = "rounded"      -- bordes redondeados en todas las ventanas flotantes
 
 -- ── lazy.nvim ────────────────────────────────────────────
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -119,6 +120,10 @@ require("lazy").setup({
             if luasnip.jumpable(-1) then luasnip.jump(-1) else fallback() end
           end, { "i", "s" }),
         }),
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
         sources = cmp.config.sources(
           { { name = "nvim_lsp" }, { name = "luasnip" }, { name = "path" } },
           { { name = "buffer" } }
@@ -332,12 +337,13 @@ require("lazy").setup({
           },
           globalstatus = true,
           icons_enabled = nf,
-          component_separators = nf and { left = "", right = "" } or { left = "|", right = "|" },
-          section_separators = nf and { left = "", right = "" } or { left = "", right = "" },
+          -- estilo "burbujas": extremos redondeados
+          component_separators = nf and { left = "", right = "" } or { left = "|", right = "|" },
+          section_separators = nf and { left = "", right = "" } or { left = "", right = "" },
           disabled_filetypes = { statusline = { "NvimTree" } },
         },
         sections = {
-          lualine_a = { "mode" },
+          lualine_a = { { "mode", separator = nf and { left = "", right = "" } or nil } },
           lualine_b = { "branch", "diff" },
           lualine_c = {
             { "diagnostics", symbols = nf and { error = " ", warn = " ", info = " ", hint = "󰌵 " }
@@ -346,7 +352,7 @@ require("lazy").setup({
           },
           lualine_x = { "filetype" },
           lualine_y = { "progress" },
-          lualine_z = { "location" },
+          lualine_z = { { "location", separator = nf and { left = "", right = "" } or nil } },
         },
         extensions = { "nvim-tree", "toggleterm", "lazy", "trouble" },
       }
@@ -408,7 +414,7 @@ require("lazy").setup({
     keys = { { "<F1>", "<cmd>ToggleTerm<cr>", mode = { "n", "t" }, desc = "Terminal" } },
     opts = { direction = "horizontal", size = 15 },
   },
-}, { install = { colorscheme = { "gruvbox-flutter" } } })
+}, { install = { colorscheme = { "gruvbox-flutter" } }, ui = { border = "rounded" } })
 
 -- ── Diagnósticos inline (Error Lens) ─────────────────────
 -- Colores Flutter 0xAARRGGBB sueltos (ej. const kGrey = 0xffa2a2a2), que el LSP no pinta.

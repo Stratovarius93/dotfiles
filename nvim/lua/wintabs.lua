@@ -93,12 +93,17 @@ function M.render()
     local errs = vim.diagnostic.count(b)[vim.diagnostic.severity.ERROR] or 0
     local warns = vim.diagnostic.count(b)[vim.diagnostic.severity.WARN] or 0
     local diag = ""
-    if errs > 0 then diag = hl(sel and "WinTabErrSel" or "WinTabErr", " ✖" .. errs)
-    elseif warns > 0 then diag = hl(sel and "WinTabWarnSel" or "WinTabWarn", " ▲" .. warns) end
+    -- en la píldora activa (azul) el rojo/amarillo no se lee: usa el color del texto
+    local function dg(kind) return sel and (focused and group or "WinTab" .. kind .. "Sel") or "WinTab" .. kind end
+    if errs > 0 then diag = hl(dg("Err"), " ✖" .. errs)
+    elseif warns > 0 then diag = hl(dg("Warn"), " ▲" .. warns) end
     local mod = vim.bo[b].modified and " ●" or ""
+    -- pestaña tipo píldora: extremos redondeados (Nerd Font) o planos
+    local l_cap, r_cap = "", ""
+    if vim.g.have_nerd_font then l_cap, r_cap = hl(group .. "Cap", ""), hl(group .. "Cap", "") end
     table.insert(parts, ("%%%d@v:lua.WinTabs_click@"):format(b)
-      .. hl(group, " " .. icon .. name .. mod) .. diag .. hl(group, " ")
-      .. "%X" .. hl("WinTabSep", "│"))
+      .. l_cap .. hl(group, " " .. icon .. name .. mod) .. diag .. hl(group, " ") .. r_cap
+      .. "%X" .. hl("WinTabFill", " "))
   end
   return "%<" .. table.concat(parts) .. hl("WinTabFill", "")
 end
@@ -182,19 +187,22 @@ end
 local function set_highlights()
   local ok, theme = pcall(require, "gruvbox-flutter")
   local p = ok and theme.palette or {
-    bg0 = "#282828", bg1 = "#32302f", bg3 = "#3c3836", fg = "#ebdbb2", grey1 = "#928374",
+    bg0 = "#282828", bg1 = "#32302f", bg3 = "#3c3836", bg4 = "#45403d", fg = "#ebdbb2", grey1 = "#928374",
     blue = "#7daea3", red = "#ea6962", yellow = "#d8a657",
   }
   local set = function(n, o) api.nvim_set_hl(0, n, o) end
   set("WinTabFill", { bg = p.bg1 })
-  set("WinTab", { fg = p.grey1, bg = p.bg1 })
-  set("WinTabSel", { fg = p.fg, bg = p.bg0, bold = true, underline = true, sp = p.blue })
-  set("WinTabSelNC", { fg = p.fg, bg = p.bg0 })
-  set("WinTabSep", { fg = p.bg3, bg = p.bg1 })
-  set("WinTabErr", { fg = p.red, bg = p.bg1 })
-  set("WinTabErrSel", { fg = p.red, bg = p.bg0 })
-  set("WinTabWarn", { fg = p.yellow, bg = p.bg1 })
-  set("WinTabWarnSel", { fg = p.yellow, bg = p.bg0 })
+  set("WinTab", { fg = p.grey1, bg = p.bg3 })
+  set("WinTabSel", { fg = p.bg0, bg = p.blue, bold = true })
+  set("WinTabSelNC", { fg = p.fg, bg = p.bg4 })
+  -- extremos redondeados: color de la píldora sobre el fondo de la barra
+  set("WinTabCap", { fg = p.bg3, bg = p.bg1 })
+  set("WinTabSelCap", { fg = p.blue, bg = p.bg1 })
+  set("WinTabSelNCCap", { fg = p.bg4, bg = p.bg1 })
+  set("WinTabErr", { fg = p.red, bg = p.bg3 })
+  set("WinTabErrSel", { fg = p.red, bg = p.bg4 })
+  set("WinTabWarn", { fg = p.yellow, bg = p.bg3 })
+  set("WinTabWarnSel", { fg = p.yellow, bg = p.bg4 })
   set("WinBar", { bg = p.bg1 })
   set("WinBarNC", { bg = p.bg1 })
 end
