@@ -211,6 +211,7 @@ local WINBAR = "%{%v:lua.require'wintabs'.render()%}"
 
 local function update_winbar(win)
   if not api.nvim_win_is_valid(win) or api.nvim_win_get_config(win).relative ~= "" then return end
+  if vim.w[win].sidebar_title then return end -- barra de título propia (lua/sidebar.lua)
   local buf = api.nvim_win_get_buf(win)
   local want = (is_file_buf(buf) or (vim.bo[buf].buftype == "" and #M.list(win) > 0)) and WINBAR or ""
   if vim.wo[win].winbar ~= want then vim.wo[win][0].winbar = want end
