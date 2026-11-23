@@ -79,6 +79,14 @@ fi
 xcode-select -p >/dev/null 2>&1 || xcode-select --install || true   # compilador para Treesitter
 brew bundle --file="$DOTFILES/Brewfile"
 
+# gitree (TUI de commits estilo GitKraken): no es fatal si falta go o aún no está publicado
+if command -v go >/dev/null; then
+  go install github.com/Stratovarius93/gitree@latest \
+    || echo "Aviso: no se pudo instalar gitree (¿módulo aún no publicado?); sigo sin él"
+else
+  echo "Aviso: go no está instalado; omito gitree"
+fi
+
 # ── 2. Warp / Ghostty ─────────────────────────────────────
 if $APPLY_WARP; then
   step "Warp"
