@@ -69,7 +69,7 @@ Para cambiar de fuente, pon su nombre en `font_name` y `ai_font_name` de `~/.war
 - **Flutter y Dart:** flutter-tools (con fvm), LSP de Dart, nvim-treesitter
 - **Autocompletado:** nvim-cmp, LuaSnip, friendly-snippets
 - **Archivos:** nvim-tree (árbol lateral), mini.files (columnas), Ranger (ventana flotante), Telescope (búsqueda)
-- **Interfaz:** tabs por panel ([`lua/wintabs.lua`](nvim/lua/wintabs.lua)), lualine (barra de estado), trouble (panel de problemas), gitsigns, neoscroll (scroll suave), flash, toggleterm
+- **Interfaz:** tabs por panel tipo píldora ([`lua/wintabs.lua`](nvim/lua/wintabs.lua)), animaciones de paneles al abrir/cerrar nvim-tree, terminal y trouble ([`lua/anim.lua`](nvim/lua/anim.lua)), bordes redondeados en ventanas flotantes, lualine (barra de estado estilo burbujas), trouble (panel de problemas), gitsigns, neoscroll (scroll suave), flash, toggleterm
 - **Colores:** nvim-highlight-colors (`#RRGGBB`, `rgb()`, `hsl()`) y resaltador propio para `0xAARRGGBB` de Flutter
 - **Tests:** nvim-coverage
 

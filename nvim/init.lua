@@ -190,7 +190,10 @@ require("lazy").setup({
     cmd = "Trouble",
     opts = { focus = true },
     keys = {
-      { "<F4>", "<cmd>Trouble diagnostics toggle<cr>", desc = "Problemas del proyecto" },
+      { "<F4>", function()
+          require("anim").toggle("trouble", function() vim.cmd("Trouble diagnostics open") end,
+            function() vim.cmd("Trouble close") end)()
+        end, desc = "Problemas del proyecto" },
       { "<S-F4>", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Problemas del archivo" },
     },
   },
@@ -340,7 +343,6 @@ require("lazy").setup({
           -- estilo "burbujas": extremos redondeados
           component_separators = nf and { left = "", right = "" } or { left = "|", right = "|" },
           section_separators = nf and { left = "", right = "" } or { left = "", right = "" },
-          disabled_filetypes = { statusline = { "NvimTree" } },
         },
         sections = {
           lualine_a = { { "mode", separator = nf and { left = "", right = "" } or nil } },
@@ -354,7 +356,18 @@ require("lazy").setup({
           lualine_y = { "progress" },
           lualine_z = { { "location", separator = nf and { left = "", right = "" } or nil } },
         },
-        extensions = { "nvim-tree", "toggleterm", "lazy", "trouble" },
+        extensions = {
+          -- con el foco en el explorador: misma barra (modo, rama) + carpeta del proyecto
+          {
+            filetypes = { "NvimTree" },
+            sections = {
+              lualine_a = { { "mode", separator = nf and { left = "\u{e0b6}", right = "\u{e0b4}" } or nil } },
+              lualine_b = { "branch", "diff" },
+              lualine_c = { function() return vim.fn.fnamemodify(vim.fn.getcwd(), ":~") end },
+            },
+          },
+          "toggleterm", "lazy", "trouble",
+        },
       }
     end,
   },
@@ -411,7 +424,10 @@ require("lazy").setup({
   {
     "akinsho/toggleterm.nvim",
     cmd = "ToggleTerm",
-    keys = { { "<F1>", "<cmd>ToggleTerm<cr>", mode = { "n", "t" }, desc = "Terminal" } },
+    keys = { { "<F1>", function()
+      local toggle = function() vim.cmd("ToggleTerm") end
+      require("anim").toggle("toggleterm", toggle, toggle)() -- se encoge antes de ocultarse
+    end, mode = { "n", "t" }, desc = "Terminal" } },
     opts = { direction = "horizontal", size = 15 },
   },
 }, { install = { colorscheme = { "gruvbox-flutter" } }, ui = { border = "rounded" } })
@@ -506,6 +522,7 @@ map("i", "kj", "<Esc>", "Salir de insert")
 
 -- Tabs por panel (lua/wintabs.lua): cada panel tiene su fila de tabs, como VS Code
 local wintabs = require("wintabs")
+require("anim").setup() -- animaciones de paneles (nvim-tree, terminal, Trouble)
 wintabs.setup()
 map("n", "<Tab>", function() wintabs.cycle(1) end, "Tab siguiente (del panel)")
 map("n", "`", function() wintabs.cycle(-1) end, "Tab anterior (del panel)")
@@ -665,7 +682,8 @@ end
 map("n", "<leader>o", open_ranger, "Ranger (explorador flotante)")
 
 -- Barra lateral
-map("n", "<leader>n", "<cmd>NvimTreeToggle<cr>", "Mostrar/ocultar explorador")
+map("n", "<leader>n", require("anim").toggle("NvimTree", function() vim.cmd("NvimTreeOpen") end,
+  function() vim.cmd("NvimTreeClose") end), "Mostrar/ocultar explorador")
 map("n", "<leader>e", "<cmd>NvimTreeFocus<cr>", "Foco en explorador")
 
 -- EasyMotion → flash
