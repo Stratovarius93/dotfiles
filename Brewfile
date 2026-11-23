@@ -22,6 +22,7 @@ brew "fvm"
 
 # Para empaquetar el tema Gruvbox Flutter de Antigravity (npx @vscode/vsce)
 brew "node"
+brew "go"
 
 # Prompt y autocompletado en zsh (estilo Warp)
 brew "starship"
