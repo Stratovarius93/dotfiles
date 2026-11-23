@@ -86,10 +86,12 @@ function M.panel_close(win, close)
   end)
 end
 
--- Ventana del tab actual que muestra un buffer con ese filetype
+-- Ventana (no flotante) del tab actual que muestra un buffer con ese filetype
+-- (lazygit también es toggleterm, pero flotante: no es el panel de F1)
 function M.find_panel(ft)
   for _, win in ipairs(api.nvim_tabpage_list_wins(0)) do
-    if vim.bo[api.nvim_win_get_buf(win)].filetype == ft then return win end
+    if api.nvim_win_get_config(win).relative == ""
+      and vim.bo[api.nvim_win_get_buf(win)].filetype == ft then return win end
   end
 end
 

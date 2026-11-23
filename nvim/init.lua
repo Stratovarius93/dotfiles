@@ -27,6 +27,7 @@ vim.o.shiftwidth = 2
 vim.o.tabstop = 2
 vim.o.timeoutlen = 400
 vim.o.updatetime = 250
+vim.o.showtabline = 0           -- sin fila de pestañas de nvim (diffview usa una pestaña aparte)
 vim.o.winborder = "rounded"      -- bordes redondeados en todas las ventanas flotantes
 
 -- ── lazy.nvim ────────────────────────────────────────────
@@ -179,6 +180,32 @@ require("lazy").setup({
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
     opts = { current_line_blame = true },
+  },
+
+  -- Diff de los cambios sin commitear (<leader>h): se abre en su propia pestaña a
+  -- pantalla completa y al cerrarla vuelve todo como estaba. q también la cierra.
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+    keys = {
+      { "<leader>h", function()
+          if require("diffview.lib").get_current_view() then vim.cmd("DiffviewClose")
+          else vim.cmd("DiffviewOpen") end
+        end, desc = "Diff de cambios (mostrar / ocultar)" },
+      { "<leader>H", function()
+          if require("diffview.lib").get_current_view() then vim.cmd("DiffviewClose")
+          else vim.cmd("DiffviewFileHistory %") end
+        end, desc = "Historial de commits del archivo actual (mostrar / ocultar)" },
+    },
+    opts = {
+      enhanced_diff_hl = true,
+      use_icons = vim.g.have_nerd_font,
+      keymaps = {
+        view = { { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Cerrar diff" } } },
+        file_panel = { { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Cerrar diff" } } },
+        file_history_panel = { { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Cerrar diff" } } },
+      },
+    },
   },
 
   -- EasyMotion
@@ -675,6 +702,40 @@ local function open_ranger()
   term:toggle()
 end
 map("n", "<leader>o", open_ranger, "Ranger (explorador flotante)")
+
+-- Lazygit flotante (<leader>l). Una sola sesión: Ctrl+q la oculta y <leader>l la
+-- vuelve a mostrar donde estaba; q sale de lazygit y cierra la ventana.
+-- Al ocultarla/cerrarla se recargan los archivos que git haya cambiado.
+local lazygit
+local function toggle_lazygit()
+  if vim.fn.executable("lazygit") == 0 then
+    return vim.notify("lazygit no está instalado (brew install lazygit)", vim.log.levels.WARN)
+  end
+  if not lazygit then
+    lazygit = require("toggleterm.terminal").Terminal:new({
+      cmd = "lazygit",
+      dir = "git_dir", -- raíz del repo del archivo actual
+      direction = "float",
+      hidden = true, -- no se mezcla con la terminal de F1
+      float_opts = {
+        border = "rounded",
+        width = function() return math.floor(vim.o.columns * 0.9) end,
+        height = function() return math.floor(vim.o.lines * 0.85) end,
+      },
+      on_open = function(t)
+        vim.cmd("startinsert")
+        vim.keymap.set("t", "<C-q>", function() t:close() end, { buffer = t.bufnr, desc = "Ocultar lazygit" })
+      end,
+      on_close = function() vim.schedule(function() vim.cmd("silent! checktime") end) end,
+      on_exit = function()
+        lazygit = nil -- q en lazygit: la próxima vez arranca de nuevo
+        vim.schedule(function() vim.cmd("silent! checktime") end)
+      end,
+    })
+  end
+  lazygit:toggle()
+end
+map("n", "<leader>l", toggle_lazygit, "Lazygit (flotante)")
 
 -- Barra lateral
 map("n", "<leader>n", function() require("sidebar").toggle() end, "Mostrar/ocultar explorador (+ Flutter Outline)")
