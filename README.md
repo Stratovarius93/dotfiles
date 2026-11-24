@@ -31,7 +31,7 @@ Mi configuración para desarrollar en Flutter: Neovim, Ranger, Zsh + Starship, W
 
 - Pregunta a qué terminal aplicar los cambios (`Warp`, `Terminal de macOS`, `Ghostty`, una combinación o todas).
 - Instala Homebrew, si no está, y todo lo del [`Brewfile`](Brewfile): neovim, ranger, lazygit, git-delta, chafa, bat, ripgrep, fd, fvm, node, starship, fzf, carapace, zsh-autosuggestions, zsh-syntax-highlighting, fontforge y JetBrainsMono Nerd Font.
-- Instala [gitree](https://github.com/Stratovarius93/gitree) (tabla de commits estilo GitKraken en la terminal) con `go install`, si `go` está disponible.
+- Instala [gitree](https://github.com/Stratovarius93/gitree) (tabla de commits estilo GitKraken en la terminal) desde el tap `stratovarius93/tap` del Brewfile.
 - Instala Oh My Zsh y el plugin `fzf-tab` si aún no están.
 - Instala Warp y/o Ghostty si los elegiste y aún no están.
 - Enlaza `~/.config/nvim`, `~/.config/ranger`, `~/.config/starship.toml`, `~/.zshrc` y la config de lazygit a este repo (puedes añadir ajustes locales por máquina en `~/.zshrc.local`), copia la config y el tema de Warp (si se eligió), importa el perfil [`terminal/Gruvbox Flutter.terminal`](terminal/Gruvbox%20Flutter.terminal) en la app Terminal de macOS (si se eligió), y copia [`ghostty/config.ghostty`](ghostty/config.ghostty) en Ghostty con recarga en vivo (si se eligió). Si ya había una config, la guarda como `*.backup-<fecha>`.

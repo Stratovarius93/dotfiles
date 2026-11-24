@@ -24,6 +24,10 @@ brew "fvm"
 brew "node"
 brew "go"
 
+# gitree: tabla de commits estilo GitKraken en la terminal (tap propio)
+tap "stratovarius93/tap"
+brew "stratovarius93/tap/gitree"
+
 # Prompt y autocompletado en zsh (estilo Warp)
 brew "starship"
 brew "fzf"
