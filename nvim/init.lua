@@ -136,7 +136,7 @@ require("lazy").setup({
   -- Buscador (Quick Open / fzf / paleta de comandos)
   {
     "nvim-telescope/telescope.nvim",
-    branch = "0.1.x",
+    branch = "master",
     cmd = "Telescope",
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = {
